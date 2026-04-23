@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mediconnect24x7.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,14 +208,3 @@ fun RecordCard(record: HealthRecord) {
         }
     }
 }
-
-data class HealthRecord(
-    val name: String,
-    val age: Int,
-    val visits: Int,
-    val bloodGroup: String,
-    val allergies: String?,
-    val lastVisitDate: String,
-    val lastVisitReason: String,
-    val initials: String
-)
