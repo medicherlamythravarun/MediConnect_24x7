@@ -2,6 +2,7 @@ package com.example.mediconnect24x7
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -74,6 +75,7 @@ fun FilterChipBar() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -146,33 +148,41 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(LightGreenBg),
-                        contentAlignment = Alignment.Center
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(LightGreenBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = doctor.initials,
+                        color = PrimaryGreen,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(doctor.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
+                    Text(doctor.specialty, color = Color.Gray, fontSize = 14.sp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 2.dp)
                     ) {
-                        Text(
-                            text = doctor.initials,
-                            color = PrimaryGreen,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
+                        Icon(Icons.Default.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(16.dp))
+                        Text(" ${doctor.rating} · ${doctor.experience} yrs exp", fontSize = 13.sp, color = Color.Gray)
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(doctor.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
-                        Text(doctor.specialty, color = Color.Gray, fontSize = 14.sp)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(16.dp))
-                            Text(" ${doctor.rating} · ${doctor.experience} yrs exp", fontSize = 13.sp, color = Color.Gray)
-                        }
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(Icons.Default.Schedule, null, modifier = Modifier.size(14.dp), tint = PrimaryGreen)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(doctor.availability, fontSize = 12.sp, color = PrimaryGreen, fontWeight = FontWeight.Medium)
                     }
                 }
 
@@ -209,12 +219,6 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
                     Text("₹${doctor.fee}", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Color.Black)
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Schedule, null, modifier = Modifier.size(16.dp), tint = PrimaryGreen)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(doctor.availability, fontSize = 12.sp, color = PrimaryGreen, fontWeight = FontWeight.Medium)
-                }
-
                 Button(
                     onClick = { if (doctor.status == "Online") onNavigateToVideoCall() },
                     shape = RoundedCornerShape(20.dp),
@@ -222,11 +226,11 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
                         containerColor = if (doctor.status == "Online") PrimaryGreen else Color(0xFFE8F5E9),
                         contentColor = if (doctor.status == "Online") Color.White else PrimaryGreen
                     ),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
                 ) {
                     Icon(Icons.Default.Videocam, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(if (doctor.status == "Online") "Consult" else "Unavailable", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (doctor.status == "Online") "Consult" else "Unavailable", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
