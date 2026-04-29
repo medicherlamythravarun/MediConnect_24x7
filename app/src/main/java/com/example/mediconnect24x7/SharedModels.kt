@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Screen {
-    Home, Doctors, Records, Medicines, Symptoms, VideoCall
+    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login
 }
 
 data class ServiceItem(

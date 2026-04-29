@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,18 +27,26 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainAppContent() {
-    var currentScreen by remember { mutableStateOf(Screen.Home) }
+    val auth = FirebaseAuth.getInstance()
+    var currentScreen by remember { 
+        mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login) 
+    }
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(
-                currentScreen = currentScreen,
-                onScreenSelected = { currentScreen = it }
-            )
+            if (currentScreen != Screen.Login) {
+                BottomNavigationBar(
+                    currentScreen = currentScreen,
+                    onScreenSelected = { currentScreen = it }
+                )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             when (currentScreen) {
+                Screen.Login -> LoginScreen(
+                    onLoginSuccess = { currentScreen = Screen.Home }
+                )
                 Screen.Home -> MediConnectHomeScreen(
                     onNavigateToVideoCall = { currentScreen = Screen.VideoCall },
                     onNavigateToDoctors = { currentScreen = Screen.Doctors },
