@@ -52,7 +52,8 @@ fun MainAppContent() {
                     onNavigateToDoctors = { currentScreen = Screen.Doctors },
                     onNavigateToRecords = { currentScreen = Screen.Records },
                     onNavigateToMedicines = { currentScreen = Screen.Medicines },
-                    onNavigateToSymptoms = { currentScreen = Screen.Symptoms }
+                    onNavigateToSymptoms = { currentScreen = Screen.Symptoms },
+                    onNavigateToProfile = { currentScreen = Screen.Profile }
                 )
                 Screen.Doctors -> DoctorConsultationScreen(
                     onNavigateToVideoCall = { currentScreen = Screen.VideoCall }
@@ -63,6 +64,12 @@ fun MainAppContent() {
                 Screen.Records -> RecordsScreen()
                 Screen.Medicines -> MedicinesScreen()
                 Screen.Symptoms -> SymptomsScreen()
+                Screen.Profile -> ProfileScreen(
+                    onSignOut = {
+                        auth.signOut()
+                        currentScreen = Screen.Login
+                    }
+                )
             }
         }
     }

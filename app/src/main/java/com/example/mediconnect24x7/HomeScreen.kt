@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,7 +27,8 @@ fun MediConnectHomeScreen(
     onNavigateToDoctors: () -> Unit = {},
     onNavigateToRecords: () -> Unit = {},
     onNavigateToMedicines: () -> Unit = {},
-    onNavigateToSymptoms: () -> Unit = {}
+    onNavigateToSymptoms: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -43,6 +45,20 @@ fun MediConnectHomeScreen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
+            },
+            actions = {
+                IconButton(
+                    onClick = onNavigateToProfile,
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile",
+                        tint = Color.White
+                    )
+                }
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = DarkGreen

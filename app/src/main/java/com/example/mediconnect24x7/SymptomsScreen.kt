@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat
 import com.example.mediconnect24x7.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.google.ai.client.generativeai.GenerativeModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,8 +131,7 @@ fun SymptomsScreen() {
                         coroutineScope.launch {
                             isLoading = true
                             resultText = null
-                            delay(1500) // Simulate AI processing delay
-                            resultText = analyzeSymptoms(symptomText)
+                            resultText = analyzeSymptomsWithGemini(symptomText)
                             isLoading = false
                         }
                     }
@@ -224,27 +224,20 @@ fun SymptomsScreen() {
     }
 }
 
-private fun analyzeSymptoms(input: String): String {
-    val text = input.lowercase()
-    return when {
-        text.contains("chest") || text.contains("heart") -> 
-            "Based on your symptoms, we recommend consulting a Cardiologist. If you are experiencing severe chest pain, please call emergency services immediately."
-        text.contains("skin") || text.contains("rash") || text.contains("itch") -> 
-            "It looks like you might be having a skin issue. We recommend consulting a Dermatologist."
-        text.contains("headache") || text.contains("migraine") || text.contains("dizzy") -> 
-            "For severe headaches or migraines, it is best to consult a Neurologist."
-        text.contains("stomach") || text.contains("pain") || text.contains("nausea") || text.contains("digestion") -> 
-            "Your symptoms suggest a digestive issue. We recommend consulting a Gastroenterologist."
-        text.contains("eye") || text.contains("vision") || text.contains("blur") -> 
-            "For vision or eye-related issues, please consult an Ophthalmologist."
-        text.contains("bone") || text.contains("joint") || text.contains("fracture") || text.contains("knee") -> 
-            "We recommend consulting an Orthopedist for joint or bone-related discomfort."
-        text.contains("child") || text.contains("baby") || text.contains("kid") -> 
-            "For pediatric concerns, please consult a Pediatrician."
-        text.contains("fever") || text.contains("cold") || text.contains("cough") -> 
-            "You seem to have symptoms of a viral infection. A General Physician can assist you best."
-        else -> 
-            "Based on your input, we recommend consulting a General Physician for a comprehensive check-up."
+
+private suspend fun analyzeSymptomsWithGemini(input: String): String {
+    return try {
+        // IMPORTANT: Replace with your actual Gemini API Key from Google AI Studio
+        val generativeModel = GenerativeModel(
+            modelName = "gemini-1.5-flash",
+            apiKey = "AIzaSyCUKUL4gkanyB6evsBAJNzlKk_PpQVUW8Q"
+        )
+        val prompt = "You are a helpful medical assistant AI. A user reports the following symptoms: '$input'. Provide a brief, empathetic, and professional recommendation on what they should do next, and suggest which specialist they might want to consult. Do not provide a final diagnosis, always recommend consulting a doctor. Keep the response under 4 sentences."
+        
+        val response = generativeModel.generateContent(prompt)
+        response.text ?: "I'm sorry, I couldn't process your request at this time. Please consult a General Physician."
+    } catch (e: Exception) {
+        "Error communicating with AI agent: ${e.localizedMessage}. Please consult a doctor for your symptoms."
     }
 }
 
