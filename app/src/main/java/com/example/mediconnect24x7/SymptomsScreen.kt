@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.mediconnect24x7.ui.theme.*
-
-import com.example.mediconnect24x7.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

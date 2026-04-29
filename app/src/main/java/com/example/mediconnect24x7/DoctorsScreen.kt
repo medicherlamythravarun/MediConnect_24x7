@@ -197,7 +197,7 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
                 }
             }
 
-            Divider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.4f))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.4f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
