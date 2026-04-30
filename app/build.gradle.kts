@@ -48,6 +48,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.getstream:stream-webrtc-android:1.1.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
