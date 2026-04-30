@@ -37,3 +37,21 @@ data class HealthRecord(
     val lastVisitReason: String,
     val initials: String
 )
+
+data class UserProfile(
+    val uid: String = "",
+    val name: String = "",
+    val age: String = "",
+    val gender: String = "Male",
+    val email: String = "",
+    val phone: String = "",
+    val profilePicUrl: String = ""
+)
+
+data class SymptomRecord(
+    val id: String = "",
+    val userId: String = "",
+    val symptoms: String = "",
+    val aiRecommendation: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)

@@ -32,6 +32,9 @@ import com.example.mediconnect24x7.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +134,30 @@ fun SymptomsScreen() {
                         coroutineScope.launch {
                             isLoading = true
                             resultText = null
-                            resultText = analyzeSymptomsWithGemini(symptomText)
+                            val analysis = analyzeSymptomsWithGemini(symptomText)
+                            resultText = analysis
+                            
+                            // Save to Firestore
+                            val auth = FirebaseAuth.getInstance()
+                            val currentUser = auth.currentUser
+                            if (currentUser != null && analysis != null) {
+                                val firestore = FirebaseFirestore.getInstance()
+                                val record = SymptomRecord(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    userId = currentUser.uid,
+                                    symptoms = symptomText,
+                                    aiRecommendation = analysis,
+                                    timestamp = System.currentTimeMillis()
+                                )
+                                firestore.collection("users")
+                                    .document(currentUser.uid)
+                                    .collection("health_records")
+                                    .document(record.id)
+                                    .set(record)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Recommendation saved to your records", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
                             isLoading = false
                         }
                     }

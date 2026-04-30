@@ -20,16 +20,42 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.runtime.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordsScreen() {
-    val records = remember {
-        listOf(
-            HealthRecord("Ramesh Kumar", 45, 2, "B+", "Penicillin", "5 Jan 2026", "Hypertension", "RK"),
-            HealthRecord("Sunita Devi", 38, 1, "O+", null, "2 Apr 2026", "Anemia", "SD"),
-            HealthRecord("Mohan Lal", 62, 2, "A+", "Sulfa drugs, Aspirin", "10 Dec 2025", "Joint Pain", "ML")
-        )
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+    val currentUser = auth.currentUser
+    
+    var symptomRecords by remember { mutableStateOf<List<SymptomRecord>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser != null) {
+            firestore.collection("users")
+                .document(currentUser.uid)
+                .collection("health_records")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .addSnapshotListener { snapshot, e ->
+                    if (e != null) {
+                        isLoading = false
+                        return@addSnapshotListener
+                    }
+                    
+                    if (snapshot != null) {
+                        symptomRecords = snapshot.documents.mapNotNull { it.toObject(SymptomRecord::class.java) }
+                    }
+                    isLoading = false
+                }
+        } else {
+            isLoading = false
+        }
     }
 
     Scaffold(
@@ -55,7 +81,7 @@ fun RecordsScreen() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Offline Status Bar
+            // Cloud Sync Status Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,44 +89,57 @@ fun RecordsScreen() {
             ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFE8F5E9),
-                    border = null
+                    color = Color(0xFFE3F2FD),
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.VerifiedUser,
+                            Icons.Default.CloudDone,
                             null,
-                            tint = PrimaryGreen,
+                            tint = Color(0xFF1976D2),
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Stored offline on device",
+                            "Synced with Firebase Cloud",
                             fontSize = 12.sp,
-                            color = PrimaryGreen,
+                            color = Color(0xFF1976D2),
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
-                Text("${records.size} records", color = Color.Gray, fontSize = 13.sp)
+                Text("${symptomRecords.size} records", color = Color.Gray, fontSize = 13.sp)
             }
 
-            // Records List
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                items(records) { record ->
-                    RecordCard(record)
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryGreen)
+                }
+            } else if (symptomRecords.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.History, null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No health records found", color = Color.Gray)
+                    }
+                }
+            } else {
+                // Records List
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(symptomRecords) { record ->
+                        SymptomRecordCard(record)
+                    }
                 }
             }
 
             // Add New Record Button
             Button(
-                onClick = { /* TODO */ },
+                onClick = { /* Could navigate to SymptomsScreen */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -109,7 +148,90 @@ fun RecordsScreen() {
             ) {
                 Icon(Icons.Default.Add, null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Add New Record", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("New Health Checkup", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun SymptomRecordCard(record: SymptomRecord) {
+    val sdf = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
+    val dateString = sdf.format(Date(record.timestamp))
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(LightGreenBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.MedicalInformation, null, tint = PrimaryGreen, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text("AI Consultation", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
+                        Text(dateString, color = Color.Gray, fontSize = 12.sp)
+                    }
+                }
+                Icon(Icons.Default.MoreVert, null, tint = Color.Gray)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                "Symptoms reported:",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                color = DarkGreen
+            )
+            Text(
+                record.symptoms,
+                fontSize = 14.sp,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFF1F8E9)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.AutoAwesome, null, tint = PrimaryGreen, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "AI Suggestion",
+                            fontSize = 12.sp,
+                            color = PrimaryGreen,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        record.aiRecommendation,
+                        fontSize = 13.sp,
+                        color = Color.Black,
+                        lineHeight = 20.sp
+                    )
+                }
             }
         }
     }

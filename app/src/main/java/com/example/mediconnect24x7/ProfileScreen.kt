@@ -30,6 +30,8 @@ import com.example.mediconnect24x7.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import android.util.Log
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,16 +74,21 @@ fun ProfileScreen(onSignOut: () -> Unit) {
             firestore.collection("users").document(currentUser.uid).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
-                        name = document.getString("name") ?: ""
-                        age = document.getString("age") ?: ""
-                        gender = document.getString("gender") ?: "Male"
-                        email = document.getString("email") ?: ""
-                        profilePicUrl = document.getString("profilePicUrl") ?: ""
+                        val profile = document.toObject(UserProfile::class.java)
+                        if (profile != null) {
+                            name = profile.name
+                            age = profile.age
+                            gender = profile.gender
+                            email = profile.email
+                            phoneNumber = profile.phone
+                            profilePicUrl = profile.profilePicUrl
+                        }
                     }
                     isLoading = false
                 }
                 .addOnFailureListener {
                     isLoading = false
+                    android.widget.Toast.makeText(context, "Failed to load profile", android.widget.Toast.LENGTH_SHORT).show()
                 }
         }
     }
@@ -310,17 +317,33 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     onClick = {
                         if (currentUser != null) {
                             isSaving = true
-                            val userData = hashMapOf(
-                                "name" to name,
-                                "age" to age,
-                                "gender" to gender,
-                                "email" to email,
-                                "phone" to phoneNumber,
-                                "profilePicUrl" to profilePicUrl
-                            )
-                            firestore.collection("users").document(currentUser.uid).set(userData)
-                                .addOnSuccessListener { isSaving = false }
-                                .addOnFailureListener { isSaving = false }
+                            Log.d("ProfileScreen", "Starting profile save for UID: ${currentUser.uid}")
+                            try {
+                                val profile = UserProfile(
+                                    uid = currentUser.uid,
+                                    name = name,
+                                    age = age,
+                                    gender = gender,
+                                    email = email,
+                                    phone = phoneNumber,
+                                    profilePicUrl = profilePicUrl
+                                )
+                                firestore.collection("users").document(currentUser.uid).set(profile)
+                                    .addOnSuccessListener { 
+                                        isSaving = false
+                                        Log.d("ProfileScreen", "Profile save successful")
+                                        Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener { e -> 
+                                        isSaving = false
+                                        Log.e("ProfileScreen", "Profile save failed", e)
+                                        Toast.makeText(context, "Save Failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                    }
+                            } catch (e: Exception) {
+                                isSaving = false
+                                Log.e("ProfileScreen", "Error during profile save", e)
+                                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     },
                     modifier = Modifier
