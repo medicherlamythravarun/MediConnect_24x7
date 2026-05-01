@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Screen {
-    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login, Profile, RoleSelection
+    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login, Profile, RoleSelection, DoctorDetails, CompleteProfile, Appointments, Prescribe
 }
 
 data class ServiceItem(
@@ -75,4 +75,37 @@ data class MedicineRecord(
     val inventoryCount: Int = 30,
     val isTakenToday: Boolean = false,
     val lastTakenTimestamp: Long = 0L
+)
+
+data class DoctorProfile(
+    val doctorId: String = "",
+    val userId: String = "",
+    val specialization: String = "",
+    val experience: Int = 0,
+    val consultationFee: Double = 0.0,
+    val isAvailable: Boolean = true
+)
+
+data class Appointment(
+    val appointmentId: String = "",
+    val clientId: String = "",
+    val doctorId: String = "",
+    val appointmentDate: String = "",
+    val appointmentTime: String = "",
+    val status: String = "Pending", // Pending, Confirmed, Cancelled, Completed
+    val meetingId: String = ""
+)
+
+data class Availability(
+    val availabilityId: String = "",
+    val doctorId: String = "",
+    val date: String = "",
+    val startTime: String = "",
+    val endTime: String = "",
+    val isAvailable: Boolean = true
+)
+
+data class AdminProfile(
+    val adminId: String = "",
+    val userId: String = ""
 )

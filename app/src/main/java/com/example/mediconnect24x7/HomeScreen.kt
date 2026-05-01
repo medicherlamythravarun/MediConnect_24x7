@@ -25,6 +25,8 @@ import com.example.mediconnect24x7.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediConnectHomeScreen(
+    profilePicUrl: String = "",
+    userName: String = "",
     onNavigateToVideoCall: () -> Unit = {},
     onNavigateToDoctors: () -> Unit = {},
     onNavigateToRecords: () -> Unit = {},
@@ -53,13 +55,38 @@ fun MediConnectHomeScreen(
                     onClick = onNavigateToProfile,
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Profile",
-                        tint = Color.White
-                    )
+                    if (profilePicUrl.isNotEmpty()) {
+                        androidx.compose.foundation.Image(
+                            painter = coil.compose.rememberAsyncImagePainter(profilePicUrl),
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else if (userName.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color.White.copy(alpha = 0.2f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                userName.take(1).uppercase(),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Profile",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(

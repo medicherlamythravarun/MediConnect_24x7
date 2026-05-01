@@ -39,6 +39,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
@@ -91,6 +92,12 @@ fun ProfileScreen(onSignOut: () -> Unit) {
     var profilePicUrl by remember { mutableStateOf("") }
     var userRole by remember { mutableStateOf("") }
     
+    // Doctor specific fields
+    var specialization by remember { mutableStateOf("") }
+    var experience by remember { mutableStateOf("") }
+    var consultationFee by remember { mutableStateOf("") }
+    var isDoctorProfileLoaded by remember { mutableStateOf(false) }
+    
     var isLoading by remember { mutableStateOf(true) }
     var isUploading by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -140,6 +147,20 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 .addOnFailureListener {
                     isLoading = false
                     android.widget.Toast.makeText(context, "Failed to load profile", android.widget.Toast.LENGTH_SHORT).show()
+                }
+
+            // Fetch doctor details if user is a doctor
+            firestore.collection("doctors").document(currentUser.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val doctorProfile = document.toObject(DoctorProfile::class.java)
+                        if (doctorProfile != null) {
+                            specialization = doctorProfile.specialization
+                            experience = doctorProfile.experience.toString()
+                            consultationFee = doctorProfile.consultationFee.toString()
+                            isDoctorProfileLoaded = true
+                        }
+                    }
                 }
         }
     }
@@ -381,6 +402,45 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     icon = Icons.Default.Email
                 )
                 
+                if (userRole.lowercase() == "doctor") {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text(
+                        "Professional Details",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkGreen,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    ProfileField(
+                        label = "Specialization",
+                        value = specialization,
+                        onValueChange = { specialization = it },
+                        icon = Icons.Default.Badge
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    ProfileField(
+                        label = "Experience (Years)",
+                        value = experience,
+                        onValueChange = { experience = it },
+                        icon = Icons.Default.CalendarToday
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    ProfileField(
+                        label = "Consultation Fee (₹)",
+                        value = consultationFee,
+                        onValueChange = { consultationFee = it },
+                        icon = Icons.Default.Email // Using Email icon as placeholder, will change to something better if available
+                    )
+                }
+                
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 Button(
@@ -406,6 +466,20 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                                         Log.e("ProfileScreen", "Error saving profile", e)
                                         Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
+
+                                // Save doctor details if user is a doctor
+                                if (userRole.lowercase() == "doctor") {
+                                    val doctorProfile = DoctorProfile(
+                                        doctorId = currentUser.uid,
+                                        userId = currentUser.uid,
+                                        specialization = specialization,
+                                        experience = experience.toIntOrNull() ?: 0,
+                                        consultationFee = consultationFee.toDoubleOrNull() ?: 0.0,
+                                        isAvailable = true
+                                    )
+                                    firestore.collection("doctors").document(currentUser.uid)
+                                        .set(doctorProfile)
+                                }
                             } catch (e: Exception) {
                                 Log.e("ProfileScreen", "Error during profile preparation", e)
                                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()

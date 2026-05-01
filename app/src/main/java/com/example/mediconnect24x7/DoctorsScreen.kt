@@ -20,20 +20,61 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
-    val doctors = remember {
-        listOf(
-            Doctor("Dr. Anil Verma", "Cardiologist", 4.9, 18, "Online", 400, "Available now", "AV"),
-            Doctor("Dr. Priya Mehta", "Gynecologist", 4.7, 9, "Offline", 300, "Available at 4 PM", "PM"),
-            Doctor("Dr. Rakesh Singh", "Pediatrician", 4.6, 14, "Online", 250, "Available now", "RS"),
-            Doctor("Dr. Anjali Gupta", "Dermatologist", 4.8, 11, "Offline", 350, "Available tomorrow", "AG"),
-            Doctor("Dr. Suman Reddy", "Neurologist", 4.9, 20, "Online", 600, "Available now", "SR"),
-            Doctor("Dr. Vikram Patel", "Orthopedic", 4.5, 12, "Offline", 450, "Available at 6 PM", "VP"),
-            Doctor("Dr. Sneha Rao", "Psychiatrist", 4.8, 8, "Online", 500, "Available now", "SR")
-        )
+    var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val firestore = FirebaseFirestore.getInstance()
+
+    LaunchedEffect(Unit) {
+        firestore.collection("doctors").get()
+            .addOnSuccessListener { querySnapshot ->
+                val doctorProfiles = querySnapshot.toObjects(DoctorProfile::class.java)
+                
+                // Fetch user names for these doctors
+                val doctorList = mutableListOf<Doctor>()
+                var processedCount = 0
+                
+                if (doctorProfiles.isEmpty()) {
+                    isLoading = false
+                    return@addOnSuccessListener
+                }
+
+                doctorProfiles.forEach { profile ->
+                    firestore.collection("users").document(profile.userId).get()
+                        .addOnSuccessListener { userDoc ->
+                            val name = userDoc.getString("name") ?: "Unknown Doctor"
+                            doctorList.add(Doctor(
+                                name = "Dr. $name",
+                                specialty = profile.specialization,
+                                rating = 4.8, // Default rating for now
+                                experience = profile.experience,
+                                status = if (profile.isAvailable) "Online" else "Offline",
+                                fee = profile.consultationFee.toInt(),
+                                availability = if (profile.isAvailable) "Available now" else "Available later",
+                                initials = name.take(2).uppercase()
+                            ))
+                            processedCount++
+                            if (processedCount == doctorProfiles.size) {
+                                doctors = doctorList
+                                isLoading = false
+                            }
+                        }
+                        .addOnFailureListener {
+                            processedCount++
+                            if (processedCount == doctorProfiles.size) {
+                                doctors = doctorList
+                                isLoading = false
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener {
+                isLoading = false
+            }
     }
 
     Column(
@@ -61,9 +102,16 @@ fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             FilterChipBar()
-            StatisticsRow()
-            doctors.forEach { doctor ->
-                DoctorCard(doctor, onNavigateToVideoCall)
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryGreen)
+                }
+            } else if (doctors.isEmpty()) {
+                EmptyDoctorsView()
+            } else {
+                doctors.forEach { doctor ->
+                    DoctorCard(doctor, onNavigateToVideoCall)
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -237,5 +285,37 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: (Doctor) -> Unit = {}) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyDoctorsView() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 64.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            Icons.Default.SearchOff,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = Color.LightGray
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "No Doctors Found",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray
+        )
+        Text(
+            "There are currently no doctors available in your area or matching your criteria.",
+            fontSize = 14.sp,
+            color = Color.Gray,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 8.dp)
+        )
     }
 }

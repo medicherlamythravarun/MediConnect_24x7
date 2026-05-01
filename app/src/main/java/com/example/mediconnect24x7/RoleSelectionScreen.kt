@@ -99,8 +99,25 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                     // or create it with the role if it doesn't.
                     userRef.update("role", selectedRole)
                         .addOnSuccessListener {
-                            isUpdating = false
-                            onRoleSelected(selectedRole!!)
+                            if (selectedRole == "admin") {
+                                val adminRef = firestore.collection("admins").document(currentUser.uid)
+                                val adminProfile = AdminProfile(
+                                    adminId = currentUser.uid,
+                                    userId = currentUser.uid
+                                )
+                                adminRef.set(adminProfile)
+                                    .addOnSuccessListener {
+                                        isUpdating = false
+                                        onRoleSelected(selectedRole!!)
+                                    }
+                                    .addOnFailureListener { e ->
+                                        isUpdating = false
+                                        Toast.makeText(context, "Admin Sync Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                isUpdating = false
+                                onRoleSelected(selectedRole!!)
+                            }
                         }
                         .addOnFailureListener {
                             // If document doesn't exist, update will fail, so we use set
@@ -110,7 +127,20 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                                 phone = currentUser.phoneNumber ?: "",
                                 role = selectedRole!!
                             )
-                            userRef.set(newProfile)
+                            
+                            val batch = firestore.batch()
+                            batch.set(userRef, newProfile)
+                            
+                            if (selectedRole == "admin") {
+                                val adminRef = firestore.collection("admins").document(currentUser.uid)
+                                val adminProfile = AdminProfile(
+                                    adminId = currentUser.uid,
+                                    userId = currentUser.uid
+                                )
+                                batch.set(adminRef, adminProfile)
+                            }
+                            
+                            batch.commit()
                                 .addOnSuccessListener {
                                     isUpdating = false
                                     onRoleSelected(selectedRole!!)
