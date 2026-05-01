@@ -273,54 +273,5 @@ fun BottomNavigationBar(
                 indicatorColor = LightGreenBg
             )
         )
-        NavigationBarItem(
-            selected = currentScreen == Screen.Profile,
-            onClick = { onScreenSelected(Screen.Profile) },
-            icon = { 
-                if (profilePicUrl.isNotEmpty()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(profilePicUrl),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(
-                                if (currentScreen == Screen.Profile) LightGreenBg else Color.LightGray.copy(alpha = 0.2f),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (userName.isNotEmpty()) {
-                            Text(
-                                userName.take(1).uppercase(),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (currentScreen == Screen.Profile) PrimaryGreen else Color.Gray
-                            )
-                        } else {
-                            Icon(
-                                if (currentScreen == Screen.Profile) Icons.Default.Person else Icons.Outlined.Person,
-                                null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-            },
-            label = { Text("Profile", fontSize = 10.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
-                unselectedIconColor = Color.LightGray,
-                unselectedTextColor = Color.LightGray,
-                indicatorColor = LightGreenBg
-            )
-        )
     }
 }

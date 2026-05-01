@@ -6,60 +6,24 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -78,30 +42,29 @@ import com.google.firebase.storage.FirebaseStorage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(onSignOut: () -> Unit) {
+    val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
     val storage = FirebaseStorage.getInstance()
     val currentUser = auth.currentUser
-    val context = LocalContext.current
-    
+
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Male") }
     var email by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf(currentUser?.phoneNumber ?: "") }
+    var phoneNumber by remember { mutableStateOf("") }
     var profilePicUrl by remember { mutableStateOf("") }
     var userRole by remember { mutableStateOf("") }
-    
+    var isLoading by remember { mutableStateOf(true) }
+
     // Doctor specific fields
     var specialization by remember { mutableStateOf("") }
     var experience by remember { mutableStateOf("") }
     var consultationFee by remember { mutableStateOf("") }
-    var isDoctorProfileLoaded by remember { mutableStateOf(false) }
-    
-    var isLoading by remember { mutableStateOf(true) }
-    var isUploading by remember { mutableStateOf(false) }
-    var showLogoutDialog by remember { mutableStateOf(false) }
+
     var showAgePicker by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var isUploading by remember { mutableStateOf(false) }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -119,7 +82,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     onFailure = { e ->
                         isUploading = false
                         Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                        Log.e("ProfileScreen", "Image upload failed", e)
                     }
                 )
             }
@@ -131,36 +93,26 @@ fun ProfileScreen(onSignOut: () -> Unit) {
             firestore.collection("users").document(currentUser.uid).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
-                        val profile = document.toObject(UserProfile::class.java)
-                        if (profile != null) {
-                            name = profile.name
-                            age = profile.age
-                            gender = profile.gender
-                            email = profile.email
-                            phoneNumber = profile.phone
-                            profilePicUrl = profile.profilePicUrl
-                            userRole = profile.role
-                        }
-                    }
-                    isLoading = false
-                }
-                .addOnFailureListener {
-                    isLoading = false
-                    android.widget.Toast.makeText(context, "Failed to load profile", android.widget.Toast.LENGTH_SHORT).show()
-                }
+                        name = document.getString("name") ?: ""
+                        age = document.getString("age") ?: ""
+                        gender = document.getString("gender") ?: "Male"
+                        email = document.getString("email") ?: ""
+                        phoneNumber = document.getString("phone") ?: ""
+                        profilePicUrl = document.getString("profilePicUrl") ?: ""
+                        userRole = document.getString("role") ?: ""
 
-            // Fetch doctor details if user is a doctor
-            firestore.collection("doctors").document(currentUser.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val doctorProfile = document.toObject(DoctorProfile::class.java)
-                        if (doctorProfile != null) {
-                            specialization = doctorProfile.specialization
-                            experience = doctorProfile.experience.toString()
-                            consultationFee = doctorProfile.consultationFee.toString()
-                            isDoctorProfileLoaded = true
+                        if (userRole.lowercase() == "doctor") {
+                            firestore.collection("doctors").document(currentUser.uid).get()
+                                .addOnSuccessListener { doc ->
+                                    if (doc.exists()) {
+                                        specialization = doc.getString("specialization") ?: ""
+                                        experience = doc.getLong("experience")?.toString() ?: ""
+                                        consultationFee = doc.getDouble("consultationFee")?.toString() ?: ""
+                                    }
+                                }
                         }
                     }
+                    isLoading = false
                 }
         }
     }
@@ -168,8 +120,8 @@ fun ProfileScreen(onSignOut: () -> Unit) {
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Confirm Logout") },
-            text = { Text("Are you sure you want to log out of your account?") },
+            title = { Text("Sign Out", fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to sign out from your account?") },
             confirmButton = {
                 Button(
                     onClick = {
@@ -178,14 +130,16 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = EmergencyRed)
                 ) {
-                    Text("Logout")
+                    Text("Sign Out", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text("Cancel", color = Color.Gray)
                 }
-            }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = Color.White
         )
     }
 
@@ -200,313 +154,364 @@ fun ProfileScreen(onSignOut: () -> Unit) {
         )
     }
 
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = PrimaryGreen)
+        }
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAF9))
+            .background(Color(0xFFF4F7F6))
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "My Profile",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGreen
-            )
-            IconButton(
-                onClick = { showLogoutDialog = true },
-                modifier = Modifier.background(Color(0xFFFFEBEE), CircleShape)
-            ) {
-                Icon(Icons.Default.Logout, contentDescription = "Sign Out", tint = EmergencyRed)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
 
         Box(
             modifier = Modifier
-                .size(120.dp)
-                .background(LightGreenBg, CircleShape)
-                .clickable {
-                    photoPickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            if (profilePicUrl.isNotEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(profilePicUrl),
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier.fillMaxSize().clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(DarkGreen, PrimaryGreen)
+                    ),
+                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                 )
-            } else if (name.isNotEmpty()) {
-                Text(
-                    name.take(1).uppercase(),
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryGreen
-                )
-            } else {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = PrimaryGreen
-                )
-            }
-            
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(36.dp)
-                    .background(PrimaryGreen, CircleShape)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-            }
-
-            if (isUploading) {
-                CircularProgressIndicator(modifier = Modifier.size(40.dp), color = PrimaryGreen)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            if (name.isNotEmpty()) name else "Complete your profile",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-        Text(
-            phoneNumber,
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-
-        if (userRole.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Surface(
-                color = when(userRole.lowercase()) {
-                    "doctor" -> Color(0xFFE3F2FD)
-                    "admin" -> Color(0xFFFFF3E0)
-                    else -> LightGreenBg
-                },
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = userRole.uppercase(),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = when(userRole.lowercase()) {
-                        "doctor" -> Color(0xFF1976D2)
-                        "admin" -> Color(0xFFE65100)
-                        else -> DarkGreen
-                    }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                .padding(bottom = 40.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileField(
-                    label = "Full Name",
-                    value = name,
-                    onValueChange = { name = it },
-                    icon = Icons.Default.Badge
-                )
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    Box(
+                        modifier = Modifier
+                            .size(160.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.2f))
+                            .border(BorderStroke(4.dp, Color.White), CircleShape)
+                            .clickable { 
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (profilePicUrl.isNotEmpty()) {
+                            Image(
+                                painter = rememberAsyncImagePainter(profilePicUrl),
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                text = if (name.isNotEmpty()) name.take(1).uppercase() else "?",
+                                fontSize = 56.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                        
+                        if (isUploading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.3f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
+                            }
+                        }
+                    }
+                    Surface(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                        color = Color.White,
+                        shadowElevation = 4.dp
+                    ) {
+                        Icon(
+                            Icons.Default.CameraAlt,
+                            contentDescription = "Change Picture",
+                            modifier = Modifier.padding(10.dp),
+                            tint = PrimaryGreen
+                        )
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                Column {
-                    Text(
-                        "Age",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-                    )
-                    OutlinedCard(
-                        onClick = { showAgePicker = true },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.CalendarToday, null, tint = PrimaryGreen)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(if (age.isEmpty()) "Select Age" else age, color = if (age.isEmpty()) Color.Gray else Color.Black)
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.Default.ArrowDropDown, null, tint = Color.Gray)
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
                 Text(
-                    "Gender",
-                    fontSize = 12.sp,
+                    text = name.ifBlank { "Complete Your Profile" },
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                    color = Color.White
                 )
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    val genders = listOf("Male", "Female", "Others")
-                    genders.forEachIndexed { index, label ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = genders.size),
-                            onClick = { gender = label },
-                            selected = gender == label,
-                            colors = SegmentedButtonDefaults.colors(
-                                activeContainerColor = LightGreenBg,
-                                activeContentColor = DarkGreen,
-                                inactiveContainerColor = Color.White,
-                                inactiveContentColor = Color.Gray
-                            )
-                        ) {
-                            Text(label, fontSize = 13.sp)
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                ProfileField(
-                    label = "Email Address",
-                    value = email,
-                    onValueChange = { email = it },
-                    icon = Icons.Default.Email
+                Text(
+                    text = userRole.uppercase(),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .background(Color.Black.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
                 )
-                
-                if (userRole.lowercase() == "doctor") {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .offset(y = (-20).dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Text(
-                        "Professional Details",
-                        fontSize = 16.sp,
+                        "Personal Details",
                         fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
                         color = DarkGreen,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     
                     ProfileField(
-                        label = "Specialization",
-                        value = specialization,
-                        onValueChange = { specialization = it },
-                        icon = Icons.Default.Badge
+                        label = "Full Name",
+                        value = name,
+                        onValueChange = { name = it },
+                        icon = Icons.Default.Person
                     )
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    ProfileField(
-                        label = "Experience (Years)",
-                        value = experience,
-                        onValueChange = { experience = it },
-                        icon = Icons.Default.CalendarToday
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    ProfileField(
-                        label = "Consultation Fee (₹)",
-                        value = consultationFee,
-                        onValueChange = { consultationFee = it },
-                        icon = Icons.Default.Email // Using Email icon as placeholder, will change to something better if available
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Button(
-                    onClick = {
-                        if (currentUser != null) {
-                            try {
-                                val profile = UserProfile(
-                                    uid = currentUser.uid,
-                                    name = name,
-                                    age = age,
-                                    gender = gender,
-                                    email = email,
-                                    phone = phoneNumber,
-                                    profilePicUrl = profilePicUrl,
-                                    role = userRole
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            Column {
+                                Text(
+                                    "Age",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                                 )
-                                firestore.collection("users").document(currentUser.uid)
-                                    .set(profile)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                                OutlinedCard(
+                                    onClick = { showAgePicker = true },
+                                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.CalendarToday, null, tint = PrimaryGreen, modifier = Modifier.size(20.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(age.ifBlank { "Set Age" }, color = if (age.isBlank()) Color.Gray else Color.Black)
                                     }
-                                    .addOnFailureListener { e ->
-                                        Log.e("ProfileScreen", "Error saving profile", e)
-                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                                    }
-
-                                // Save doctor details if user is a doctor
-                                if (userRole.lowercase() == "doctor") {
-                                    val doctorProfile = DoctorProfile(
-                                        doctorId = currentUser.uid,
-                                        userId = currentUser.uid,
-                                        specialization = specialization,
-                                        experience = experience.toIntOrNull() ?: 0,
-                                        consultationFee = consultationFee.toDoubleOrNull() ?: 0.0,
-                                        isAvailable = true
-                                    )
-                                    firestore.collection("doctors").document(currentUser.uid)
-                                        .set(doctorProfile)
                                 }
-                            } catch (e: Exception) {
-                                Log.e("ProfileScreen", "Error during profile preparation", e)
-                                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DarkGreen)
-                ) {
-                    Text("Save Profile Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        
+                        Box(modifier = Modifier.weight(2f)) {
+                            Column {
+                                Text(
+                                    "Gender",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .background(Color(0xFFF1F3F4), RoundedCornerShape(12.dp))
+                                        .padding(4.dp)
+                                ) {
+                                    listOf("Male", "Female", "Others").forEach { g ->
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(if (gender == g) Color.White else Color.Transparent)
+                                                .clickable { gender = g },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                g,
+                                                fontSize = 13.sp,
+                                                fontWeight = if (gender == g) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (gender == g) PrimaryGreen else Color.Gray
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        TextButton(
-            onClick = { showLogoutDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Sign Out from Account", color = EmergencyRed, fontWeight = FontWeight.Medium)
+            // Contact Information Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        "Contact Information",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = DarkGreen,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    ProfileField(
+                        label = "Email Address",
+                        value = email,
+                        onValueChange = { email = it },
+                        icon = Icons.Default.Email
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    ProfileField(
+                        label = "Phone Number",
+                        value = phoneNumber,
+                        onValueChange = { /* Read only from auth */ },
+                        icon = Icons.Default.Phone
+                    )
+                }
+            }
+
+            // Professional Details (Doctor Only)
+            if (userRole.lowercase() == "doctor") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            "Professional Details",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = DarkGreen,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        ProfileField(
+                            label = "Specialization",
+                            value = specialization,
+                            onValueChange = { specialization = it },
+                            icon = Icons.Default.MedicalServices
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                ProfileField(
+                                    label = "Exp (Years)",
+                                    value = experience,
+                                    onValueChange = { experience = it },
+                                    icon = Icons.Default.History
+                                )
+                            }
+                            Box(modifier = Modifier.weight(1f)) {
+                                ProfileField(
+                                    label = "Fee (₹)",
+                                    value = consultationFee,
+                                    onValueChange = { consultationFee = it },
+                                    icon = Icons.Default.CurrencyRupee
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Action Buttons
+            Button(
+                onClick = {
+                    if (currentUser != null) {
+                        try {
+                            val profile = UserProfile(
+                                uid = currentUser.uid,
+                                name = name,
+                                age = age,
+                                gender = gender,
+                                email = email,
+                                phone = phoneNumber,
+                                profilePicUrl = profilePicUrl,
+                                role = userRole
+                            )
+                            firestore.collection("users").document(currentUser.uid)
+                                .set(profile)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                                }
+
+                            if (userRole.lowercase() == "doctor") {
+                                val doctorProfile = DoctorProfile(
+                                    doctorId = currentUser.uid,
+                                    userId = currentUser.uid,
+                                    specialization = specialization,
+                                    experience = experience.toIntOrNull() ?: 0,
+                                    consultationFee = consultationFee.toDoubleOrNull() ?: 0.0,
+                                    isAvailable = true
+                                )
+                                firestore.collection("doctors").document(currentUser.uid).set(doctorProfile)
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+            ) {
+                Text("Save Changes", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            }
+
+            OutlinedButton(
+                onClick = { showLogoutDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = EmergencyRed),
+                border = BorderStroke(1.dp, EmergencyRed.copy(alpha = 0.5f))
+            ) {
+                Icon(Icons.Default.Logout, null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Sign Out", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+            
+            Spacer(modifier = Modifier.height(40.dp))
         }
-        
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -518,27 +523,29 @@ fun AgePickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Age") },
+        title = { Text("Select Age", fontWeight = FontWeight.Bold) },
         text = {
-            Box(modifier = Modifier.height(200.dp).fillMaxWidth()) {
+            Box(modifier = Modifier.height(250.dp).fillMaxWidth()) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    (1..100).forEach { i ->
+                    (25..70).forEach { i ->
                         Text(
                             text = i.toString(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onAgeSelected(i.toString()) }
-                                .padding(vertical = 12.dp, horizontal = 24.dp),
+                                .padding(vertical = 14.dp),
                             fontSize = 18.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             color = if (currentAge == i.toString()) PrimaryGreen else Color.Black,
-                            fontWeight = if (currentAge == i.toString()) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (currentAge == i.toString()) FontWeight.ExtraBold else FontWeight.Normal
                         )
                     }
                 }
             }
         },
-        confirmButton = {}
+        confirmButton = {},
+        shape = RoundedCornerShape(28.dp),
+        containerColor = Color.White
     )
 }
 
@@ -576,18 +583,20 @@ fun ProfileField(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Gray,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
         )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(icon, contentDescription = null, tint = PrimaryGreen) },
-            shape = RoundedCornerShape(12.dp),
+            leadingIcon = { Icon(icon, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(20.dp)) },
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryGreen,
                 unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                cursorColor = PrimaryGreen
+                cursorColor = PrimaryGreen,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
             ),
             singleLine = true
         )
