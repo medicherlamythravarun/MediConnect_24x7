@@ -35,7 +35,7 @@ fun MainAppContent() {
 
     Scaffold(
         bottomBar = {
-            if (currentScreen != Screen.Login) {
+            if (currentScreen != Screen.Login && currentScreen != Screen.RoleSelection) {
                 BottomNavigationBar(
                     currentScreen = currentScreen,
                     onScreenSelected = { currentScreen = it }
@@ -43,10 +43,37 @@ fun MainAppContent() {
             }
         }
     ) { paddingValues ->
+        val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+        // Role Check logic
+        LaunchedEffect(auth.currentUser, currentScreen) {
+            val user = auth.currentUser
+            if (user != null && (currentScreen == Screen.Home || currentScreen == Screen.Profile)) {
+                firestore.collection("users").document(user.uid).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val role = document.getString("role")
+                            if (role.isNullOrEmpty()) {
+                                currentScreen = Screen.RoleSelection
+                            }
+                        } else {
+                            // User document doesn't exist yet, must select role
+                            currentScreen = Screen.RoleSelection
+                        }
+                    }
+            }
+        }
         Box(modifier = Modifier.padding(paddingValues)) {
             when (currentScreen) {
                 Screen.Login -> LoginScreen(
-                    onLoginSuccess = { currentScreen = Screen.Home }
+                    onLoginSuccess = { 
+                        currentScreen = Screen.Home 
+                    }
+                )
+                Screen.RoleSelection -> RoleSelectionScreen(
+                    onRoleSelected = { role ->
+                        currentScreen = Screen.Home
+                    }
                 )
                 Screen.Home -> MediConnectHomeScreen(
                     onNavigateToVideoCall = { currentScreen = Screen.VideoCall },

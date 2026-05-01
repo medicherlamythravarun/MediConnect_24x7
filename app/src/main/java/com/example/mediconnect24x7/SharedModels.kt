@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Screen {
-    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login, Profile
+    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login, Profile, RoleSelection
 }
 
 data class ServiceItem(
@@ -42,10 +42,11 @@ data class UserProfile(
     val uid: String = "",
     val name: String = "",
     val age: String = "",
-    val gender: String = "Male",
+    val gender: String = "",
     val email: String = "",
     val phone: String = "",
-    val profilePicUrl: String = ""
+    val profilePicUrl: String = "",
+    val role: String = "" // "doctor", "client", "admin"
 )
 
 data class SymptomRecord(

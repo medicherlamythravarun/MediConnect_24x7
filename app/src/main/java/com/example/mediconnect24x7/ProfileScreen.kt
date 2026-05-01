@@ -1,21 +1,61 @@
 package com.example.mediconnect24x7
 
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,12 +66,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.mediconnect24x7.ui.theme.*
+import com.example.mediconnect24x7.ui.theme.DarkGreen
+import com.example.mediconnect24x7.ui.theme.EmergencyRed
+import com.example.mediconnect24x7.ui.theme.LightGreenBg
+import com.example.mediconnect24x7.ui.theme.PrimaryGreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import android.util.Log
-import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +89,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf(currentUser?.phoneNumber ?: "") }
     var profilePicUrl by remember { mutableStateOf("") }
+    var userRole by remember { mutableStateOf("") }
     
     var isLoading by remember { mutableStateOf(true) }
     var isUploading by remember { mutableStateOf(false) }
@@ -90,6 +132,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                             email = profile.email
                             phoneNumber = profile.phone
                             profilePicUrl = profile.profilePicUrl
+                            userRole = profile.role
                         }
                     }
                     isLoading = false
@@ -229,6 +272,31 @@ fun ProfileScreen(onSignOut: () -> Unit) {
             color = Color.Gray
         )
 
+        if (userRole.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Surface(
+                color = when(userRole.lowercase()) {
+                    "doctor" -> Color(0xFFE3F2FD)
+                    "admin" -> Color(0xFFFFF3E0)
+                    else -> LightGreenBg
+                },
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = userRole.uppercase(),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = when(userRole.lowercase()) {
+                        "doctor" -> Color(0xFF1976D2)
+                        "admin" -> Color(0xFFE65100)
+                        else -> DarkGreen
+                    }
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Card(
@@ -326,12 +394,20 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                                     gender = gender,
                                     email = email,
                                     phone = phoneNumber,
-                                    profilePicUrl = profilePicUrl
+                                    profilePicUrl = profilePicUrl,
+                                    role = userRole
                                 )
-                                firestore.collection("users").document(currentUser.uid).set(profile)
-                                Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                                firestore.collection("users").document(currentUser.uid)
+                                    .set(profile)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("ProfileScreen", "Error saving profile", e)
+                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
                             } catch (e: Exception) {
-                                Log.e("ProfileScreen", "Error during profile save", e)
+                                Log.e("ProfileScreen", "Error during profile preparation", e)
                                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                         }

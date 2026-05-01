@@ -261,6 +261,9 @@ fun MedicineCard(medicine: MedicineRecord) {
                             firestore.collection("users").document(user.uid)
                                 .collection("medicines").document(medicine.id)
                                 .set(updatedMed)
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Update failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
                         }
                     },
                 color = buttonBgColor,
@@ -439,9 +442,13 @@ fun AddMedicineDialog(onDismiss: () -> Unit) {
                             firestore.collection("users").document(user.uid)
                                 .collection("medicines").document(newMed.id)
                                 .set(newMed)
-                            
-                            Toast.makeText(context, "Medicine Added!", Toast.LENGTH_SHORT).show()
-                            onDismiss()
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Medicine Added!", Toast.LENGTH_SHORT).show()
+                                    onDismiss()
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Failed to add: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
                         } else {
                             Toast.makeText(context, "Please enter a medicine name", Toast.LENGTH_SHORT).show()
                         }
