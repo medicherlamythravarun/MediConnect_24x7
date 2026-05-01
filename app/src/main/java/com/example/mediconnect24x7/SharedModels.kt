@@ -69,8 +69,8 @@ data class MedicineRecord(
     val userId: String = "",
     val name: String = "",
     val dosage: String = "",
-    val timeOfDay: String = "Morning", // Morning, Afternoon, Evening
-    val form: String = "Tablet", // Tablet, Capsule, Liquid, Inhaler, Drops
+    val timeOfDay: String = "Morning",
+    val form: String = "Tablet",
     val inventoryCount: Int = 30,
     val isTakenToday: Boolean = false,
     val lastTakenTimestamp: Long = 0L

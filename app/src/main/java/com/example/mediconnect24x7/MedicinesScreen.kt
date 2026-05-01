@@ -55,7 +55,6 @@ fun MedicinesScreen() {
     var showAddDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Fetch Medicines
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             firestore.collection("users")
@@ -65,7 +64,6 @@ fun MedicinesScreen() {
                     if (snapshot != null) {
                         val meds = snapshot.documents.mapNotNull { it.toObject(MedicineRecord::class.java) }
                         
-                        // Reset "isTakenToday" if it's a new day
                         val today = Calendar.getInstance()
                         today.set(Calendar.HOUR_OF_DAY, 0)
                         today.set(Calendar.MINUTE, 0)
@@ -203,7 +201,6 @@ fun MedicineCard(medicine: MedicineRecord) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Visual Icon
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -216,7 +213,6 @@ fun MedicineCard(medicine: MedicineRecord) {
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            // Details
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = medicine.name,
@@ -240,7 +236,6 @@ fun MedicineCard(medicine: MedicineRecord) {
                 }
             }
             
-            // Beautiful Animated Action Button
             val buttonBgColor by animateColorAsState(if (medicine.isTakenToday) PrimaryGreen.copy(alpha = 0.15f) else PrimaryGreen)
             val buttonTextColor by animateColorAsState(if (medicine.isTakenToday) PrimaryGreen else Color.White)
 
@@ -291,7 +286,6 @@ fun MedicineCard(medicine: MedicineRecord) {
                 }
             }
             
-            // Delete Icon
             IconButton(
                 onClick = {
                     val user = auth.currentUser

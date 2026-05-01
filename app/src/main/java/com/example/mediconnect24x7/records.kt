@@ -52,14 +52,12 @@ fun RecordsScreen() {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("AI Consultations", "Uploaded Reports")
 
-    // File Picker Launcher
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null && currentUser != null) {
             isUploading = true
             
-            // Get file name
             var fileName = "Medical_Report_${System.currentTimeMillis()}"
             context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
@@ -88,7 +86,7 @@ fun RecordsScreen() {
                             .addOnSuccessListener {
                                 isUploading = false
                                 Toast.makeText(context, "Report uploaded successfully!", Toast.LENGTH_SHORT).show()
-                                selectedTabIndex = 1 // Switch to reports tab
+                                selectedTabIndex = 1
                             }
                             .addOnFailureListener {
                                 isUploading = false
@@ -103,7 +101,6 @@ fun RecordsScreen() {
         }
     }
 
-    // Fetch AI Consultations
     LaunchedEffect(currentUser?.uid) {
         if (currentUser != null) {
             firestore.collection("users")
@@ -200,7 +197,6 @@ fun RecordsScreen() {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Status Bar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -274,7 +270,7 @@ fun RecordsScreen() {
                             }
                         }
                         item {
-                            Spacer(modifier = Modifier.height(80.dp)) // padding for FAB
+                            Spacer(modifier = Modifier.height(80.dp))
                         }
                     }
                 }
@@ -402,7 +398,6 @@ fun RecordCard(record: HealthRecord) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Avatar
                     Box(
                         modifier = Modifier
                             .size(48.dp)

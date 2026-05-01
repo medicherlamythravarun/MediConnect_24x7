@@ -45,7 +45,6 @@ fun SymptomsScreen() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // Speech Recognizer Launcher
     val speechLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -59,7 +58,6 @@ fun SymptomsScreen() {
         }
     }
 
-    // Permission Launcher
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -137,7 +135,6 @@ fun SymptomsScreen() {
                             val analysis = analyzeSymptomsWithGemini(symptomText)
                             resultText = analysis
                             
-                            // Save to Firestore
                             val auth = FirebaseAuth.getInstance()
                             val currentUser = auth.currentUser
                             if (currentUser != null && analysis != null) {
@@ -253,7 +250,6 @@ fun SymptomsScreen() {
 
 private suspend fun analyzeSymptomsWithGemini(input: String): String {
     return try {
-        // IMPORTANT: Replace with your actual Gemini API Key from Google AI Studio
         val generativeModel = GenerativeModel(
             modelName = "gemini-2.5-flash",
             apiKey = "AIzaSyA9mnIAjVwjaQGc9eztetuQhZJnS30I3L8"

@@ -26,8 +26,7 @@ import com.example.mediconnect24x7.ui.theme.PrimaryGreen
 @Composable
 fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
     val context = LocalContext.current
-    
-    // ZegoCloud Credentials
+
     val appID: Long = 1201812457L 
     val appSign = "0b3605d4bf3e72481c477bfc0abb5a06ef137a5e11672edfbff0c051c0a8d775" 
     
@@ -52,7 +51,6 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             
-            // Doctor Avatar Placeholder
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -102,7 +100,6 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Connect Button
             Button(
                 onClick = {
                     val intent = Intent(context, CallActivity::class.java).apply {

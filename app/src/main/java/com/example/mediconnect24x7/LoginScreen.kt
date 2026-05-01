@@ -43,7 +43,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     var timerSeconds by remember { mutableStateOf(119) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Timer logic
     LaunchedEffect(isOtpSent) {
         if (isOtpSent) {
             timerSeconds = 119
@@ -57,10 +56,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEDF2EF)), // Premium light greenish background
+            .background(Color(0xFFEDF2EF)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,7 +82,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
         }
 
-        // Main Content Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,7 +96,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // User Icon with pulsing effect placeholder
+                
                 Box(
                     modifier = Modifier
                         .size(72.dp)
@@ -132,7 +130,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Spacer(modifier = Modifier.height(40.dp))
 
                 if (!isOtpSent) {
-                    // Phone Number Input Section
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             "Phone Number",
@@ -145,7 +142,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Country Code Dropdown
                             Surface(
                                 modifier = Modifier
                                     .height(56.dp)
@@ -165,7 +161,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             
                             Spacer(modifier = Modifier.width(12.dp))
                             
-                            // Phone Input
                             TextField(
                                 value = phoneNumber,
                                 onValueChange = { if (it.length <= 10) phoneNumber = it },
@@ -222,7 +217,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         }
                     }
                 } else {
-                    // OTP Verification Section
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -257,7 +251,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // OTP Digit Boxes
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
@@ -355,7 +348,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Security Badges
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(bottom = 40.dp)
@@ -395,7 +387,6 @@ private fun sendOtp(
         .setActivity(activity)
         .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                // Potential for auto-retrieval
             }
 
             override fun onVerificationFailed(e: FirebaseException) {

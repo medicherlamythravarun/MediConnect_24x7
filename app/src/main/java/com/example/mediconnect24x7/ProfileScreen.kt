@@ -77,7 +77,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
         }
     )
 
-    // Load user data from Firestore
     LaunchedEffect(currentUser?.uid) {
         if (currentUser != null) {
             firestore.collection("users").document(currentUser.uid).get()
@@ -145,7 +144,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Bar
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -167,7 +165,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Profile Picture
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -202,7 +199,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 )
             }
             
-            // Edit icon overlay
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -235,7 +231,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Profile Form
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -254,7 +249,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Age Picker Field
                 Column {
                     Text(
                         "Age",
@@ -284,7 +278,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(20.dp))
                 
-                // Gender Selection (3-way toggle)
                 Text(
                     "Gender",
                     fontSize = 12.sp,
