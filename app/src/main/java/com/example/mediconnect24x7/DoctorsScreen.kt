@@ -23,13 +23,16 @@ import com.example.mediconnect24x7.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorConsultationScreen(onNavigateToVideoCall: () -> Unit = {}) {
+fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
     val doctors = remember {
         listOf(
             Doctor("Dr. Anil Verma", "Cardiologist", 4.9, 18, "Online", 400, "Available now", "AV"),
             Doctor("Dr. Priya Mehta", "Gynecologist", 4.7, 9, "Offline", 300, "Available at 4 PM", "PM"),
             Doctor("Dr. Rakesh Singh", "Pediatrician", 4.6, 14, "Online", 250, "Available now", "RS"),
-            Doctor("Dr. Anjali Gupta", "Dermatologist", 4.8, 11, "Offline", 350, "Available tomorrow", "AG")
+            Doctor("Dr. Anjali Gupta", "Dermatologist", 4.8, 11, "Offline", 350, "Available tomorrow", "AG"),
+            Doctor("Dr. Suman Reddy", "Neurologist", 4.9, 20, "Online", 600, "Available now", "SR"),
+            Doctor("Dr. Vikram Patel", "Orthopedic", 4.5, 12, "Offline", 450, "Available at 6 PM", "VP"),
+            Doctor("Dr. Sneha Rao", "Psychiatrist", 4.8, 8, "Online", 500, "Available now", "SR")
         )
     }
 
@@ -137,7 +140,7 @@ fun StatCard(value: String, label: String, bgColor: Color, textColor: Color, mod
 }
 
 @Composable
-fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
+fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: (Doctor) -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -220,7 +223,7 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: () -> Unit = {}) {
                 }
 
                 Button(
-                    onClick = { if (doctor.status == "Online") onNavigateToVideoCall() },
+                    onClick = { if (doctor.status == "Online") onNavigateToVideoCall(doctor) },
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (doctor.status == "Online") PrimaryGreen else Color(0xFFE8F5E9),

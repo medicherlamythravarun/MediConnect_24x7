@@ -55,3 +55,23 @@ data class SymptomRecord(
     val aiRecommendation: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
+
+data class ReportRecord(
+    val id: String = "",
+    val userId: String = "",
+    val fileName: String = "",
+    val fileUrl: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+data class MedicineRecord(
+    val id: String = "",
+    val userId: String = "",
+    val name: String = "",
+    val dosage: String = "",
+    val timeOfDay: String = "Morning", // Morning, Afternoon, Evening
+    val form: String = "Tablet", // Tablet, Capsule, Liquid, Inhaler, Drops
+    val inventoryCount: Int = 30,
+    val isTakenToday: Boolean = false,
+    val lastTakenTimestamp: Long = 0L
+)

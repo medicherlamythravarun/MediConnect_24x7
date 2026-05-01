@@ -71,7 +71,7 @@ fun SymptomsScreen() {
             try {
                 speechLauncher.launch(intent)
             } catch (e: Exception) {
-                // Feature not supported on device
+                Toast.makeText(context, "Voice input not supported on this device", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -231,7 +231,7 @@ fun SymptomsScreen() {
                         try {
                             speechLauncher.launch(intent)
                         } catch (e: Exception) {
-                            // Feature not supported on device
+                            Toast.makeText(context, "Voice input not supported on this device", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -255,8 +255,8 @@ private suspend fun analyzeSymptomsWithGemini(input: String): String {
     return try {
         // IMPORTANT: Replace with your actual Gemini API Key from Google AI Studio
         val generativeModel = GenerativeModel(
-            modelName = "gemini-1.5-flash",
-            apiKey = "AIzaSyCUKUL4gkanyB6evsBAJNzlKk_PpQVUW8Q"
+            modelName = "gemini-2.5-flash",
+            apiKey = "AIzaSyA9mnIAjVwjaQGc9eztetuQhZJnS30I3L8"
         )
         val prompt = "You are a helpful medical assistant AI. A user reports the following symptoms: '$input'. Provide a brief, empathetic, and professional recommendation on what they should do next, and suggest which specialist they might want to consult. Do not provide a final diagnosis, always recommend consulting a doctor. Keep the response under 4 sentences."
         

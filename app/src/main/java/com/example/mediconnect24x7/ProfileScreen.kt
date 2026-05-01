@@ -50,7 +50,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
     var profilePicUrl by remember { mutableStateOf("") }
     
     var isLoading by remember { mutableStateOf(true) }
-    var isSaving by remember { mutableStateOf(false) }
     var isUploading by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showAgePicker by remember { mutableStateOf(false) }
@@ -60,10 +59,20 @@ fun ProfileScreen(onSignOut: () -> Unit) {
         onResult = { uri ->
             if (uri != null) {
                 isUploading = true
-                uploadProfilePicture(storage, currentUser?.uid ?: "", uri) { url ->
-                    profilePicUrl = url
-                    isUploading = false
-                }
+                uploadProfilePicture(
+                    storage = storage,
+                    userId = currentUser?.uid ?: "",
+                    imageUri = uri,
+                    onSuccess = { url ->
+                        profilePicUrl = url
+                        isUploading = false
+                    },
+                    onFailure = { e ->
+                        isUploading = false
+                        Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("ProfileScreen", "Image upload failed", e)
+                    }
+                )
             }
         }
     )
@@ -316,8 +325,6 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 Button(
                     onClick = {
                         if (currentUser != null) {
-                            isSaving = true
-                            Log.d("ProfileScreen", "Starting profile save for UID: ${currentUser.uid}")
                             try {
                                 val profile = UserProfile(
                                     uid = currentUser.uid,
@@ -329,18 +336,8 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                                     profilePicUrl = profilePicUrl
                                 )
                                 firestore.collection("users").document(currentUser.uid).set(profile)
-                                    .addOnSuccessListener { 
-                                        isSaving = false
-                                        Log.d("ProfileScreen", "Profile save successful")
-                                        Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
-                                    }
-                                    .addOnFailureListener { e -> 
-                                        isSaving = false
-                                        Log.e("ProfileScreen", "Profile save failed", e)
-                                        Toast.makeText(context, "Save Failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                                    }
+                                Toast.makeText(context, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
                             } catch (e: Exception) {
-                                isSaving = false
                                 Log.e("ProfileScreen", "Error during profile save", e)
                                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
@@ -350,14 +347,9 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DarkGreen),
-                    enabled = !isSaving
+                    colors = ButtonDefaults.buttonColors(containerColor = DarkGreen)
                 ) {
-                    if (isSaving) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Save Profile Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    }
+                    Text("Save Profile Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
         }
@@ -411,7 +403,8 @@ private fun uploadProfilePicture(
     storage: FirebaseStorage,
     userId: String,
     imageUri: Uri,
-    onSuccess: (String) -> Unit
+    onSuccess: (String) -> Unit,
+    onFailure: (Exception) -> Unit
 ) {
     val ref = storage.reference.child("profile_pics/$userId.jpg")
     ref.putFile(imageUri)
@@ -421,6 +414,9 @@ private fun uploadProfilePicture(
         }
         .addOnSuccessListener { url ->
             onSuccess(url.toString())
+        }
+        .addOnFailureListener { e ->
+            onFailure(e)
         }
 }
 

@@ -1,5 +1,7 @@
 package com.example.mediconnect24x7
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -236,8 +238,15 @@ fun ServiceCard(item: ServiceItem, modifier: Modifier = Modifier) {
 
 @Composable
 fun EmergencyCard() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:104"))
+                context.startActivity(intent)
+            },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = EmergencyRed)
     ) {

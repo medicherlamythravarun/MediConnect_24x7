@@ -31,6 +31,7 @@ fun MainAppContent() {
     var currentScreen by remember { 
         mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login) 
     }
+    var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
 
     Scaffold(
         bottomBar = {
@@ -56,10 +57,17 @@ fun MainAppContent() {
                     onNavigateToProfile = { currentScreen = Screen.Profile }
                 )
                 Screen.Doctors -> DoctorConsultationScreen(
-                    onNavigateToVideoCall = { currentScreen = Screen.VideoCall }
+                    onNavigateToVideoCall = { doctor ->
+                        selectedDoctor = doctor
+                        currentScreen = Screen.VideoCall 
+                    }
                 )
                 Screen.VideoCall -> VideoCallScreen(
-                    onEndCall = { currentScreen = Screen.Home }
+                    doctor = selectedDoctor,
+                    onEndCall = { 
+                        selectedDoctor = null
+                        currentScreen = Screen.Home 
+                    }
                 )
                 Screen.Records -> RecordsScreen()
                 Screen.Medicines -> MedicinesScreen()
