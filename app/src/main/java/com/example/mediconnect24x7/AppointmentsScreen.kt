@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,7 +27,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentsScreen() {
+fun AppointmentsScreen(onJoinCall: (Appointment) -> Unit = {}) {
+
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
@@ -34,22 +36,29 @@ fun AppointmentsScreen() {
     var appointments by remember { mutableStateOf<List<Appointment>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(currentUser?.uid) {
+    DisposableEffect(currentUser?.uid) {
+        var listenerRegistration: com.google.firebase.firestore.ListenerRegistration? = null
         if (currentUser != null) {
-            // Fetch appointments where the current user is either the doctor or the client
-            firestore.collection("appointments")
-                .whereArrayContainsAny("participants", listOf(currentUser.uid)) // Assuming we add a participants array for easier querying
-                // Alternatively, query doctorId or clientId based on role. 
-                // For now, let's just query doctorId == uid since this is primarily for the Doctor view per request.
-                .whereEqualTo("doctorId", currentUser.uid)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    appointments = querySnapshot.toObjects(Appointment::class.java)
+            listenerRegistration = firestore.collection("appointments")
+                .whereArrayContains("participants", currentUser.uid)
+                .addSnapshotListener { querySnapshot, error ->
+                    if (error != null) {
+                        isLoading = false
+                        return@addSnapshotListener
+                    }
+                    if (querySnapshot != null) {
+                        val allAppointments = querySnapshot.toObjects(Appointment::class.java)
+                        // Show only the latest one
+                        appointments = allAppointments.sortedByDescending { it.timestamp }.take(1)
+                    }
                     isLoading = false
                 }
-                .addOnFailureListener {
-                    isLoading = false
-                }
+        } else {
+            isLoading = false
+        }
+        
+        onDispose {
+            listenerRegistration?.remove()
         }
     }
 
@@ -78,7 +87,7 @@ fun AppointmentsScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(appointments) { appointment ->
-                    AppointmentCard(appointment)
+                    AppointmentCard(appointment, onJoinCall)
                 }
             }
         }
@@ -86,7 +95,8 @@ fun AppointmentsScreen() {
 }
 
 @Composable
-fun AppointmentCard(appointment: Appointment) {
+fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit = {}) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -106,8 +116,8 @@ fun AppointmentCard(appointment: Appointment) {
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text("Patient ID: ${appointment.clientId.takeLast(6)}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(appointment.status, color = if (appointment.status == "Confirmed") PrimaryGreen else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(appointment.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(appointment.status, color = if (appointment.status == "Confirmed" || appointment.status == "Ongoing") PrimaryGreen else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }
             
@@ -125,6 +135,20 @@ fun AppointmentCard(appointment: Appointment) {
                     Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(appointment.appointmentTime, fontSize = 14.sp, color = Color.DarkGray)
+                }
+            }
+
+            if (appointment.status == "Ongoing") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { onJoinCall(appointment) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.Videocam, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Join Call Now")
                 }
             }
         }

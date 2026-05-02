@@ -42,6 +42,10 @@ fun MainAppContent() {
         mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login) 
     }
     var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
+    var selectedCallID by remember { mutableStateOf("") }
+    var selectedAppointmentId by remember { mutableStateOf("") }
+
+
     var userRole by remember { mutableStateOf("") }
     var userProfilePic by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
@@ -127,25 +131,42 @@ fun MainAppContent() {
                 Screen.Home -> MediConnectHomeScreen(
                     profilePicUrl = userProfilePic,
                     userName = userName,
-                    onNavigateToVideoCall = { currentScreen = Screen.VideoCall },
+                    userRole = userRole,
+                    onNavigateToVideoCall = { currentScreen = if (userRole == "doctor") Screen.Appointments else Screen.Doctors },
                     onNavigateToDoctors = { currentScreen = if (userRole == "doctor") Screen.Appointments else Screen.Doctors },
                     onNavigateToRecords = { currentScreen = Screen.Records },
                     onNavigateToMedicines = { currentScreen = if (userRole == "doctor") Screen.Prescribe else Screen.Medicines },
                     onNavigateToSymptoms = { currentScreen = Screen.Symptoms },
                     onNavigateToProfile = { currentScreen = Screen.Profile }
                 )
-                Screen.Appointments -> AppointmentsScreen()
+                Screen.Appointments -> AppointmentsScreen(
+                    onJoinCall = { appointment ->
+                        selectedCallID = appointment.meetingId
+                        selectedAppointmentId = appointment.appointmentId
+                        currentScreen = Screen.VideoCall
+                    }
+                )
+
                 Screen.Prescribe -> PrescribeScreen()
                 Screen.Doctors -> DoctorConsultationScreen(
-                    onNavigateToVideoCall = { doctor ->
+                    clientName = userName,
+                    onNavigateToVideoCall = { doctor, callID, appointmentId ->
                         selectedDoctor = doctor
+                        selectedCallID = callID
+                        selectedAppointmentId = appointmentId
                         currentScreen = Screen.VideoCall 
                     }
                 )
                 Screen.VideoCall -> VideoCallScreen(
                     doctor = selectedDoctor,
+                    userID = auth.currentUser?.uid ?: "user_${System.currentTimeMillis() % 10000}",
+                    userName = if (userName.isNotEmpty()) userName else "User_${auth.currentUser?.uid?.take(4)}",
+                    callID = selectedCallID,
+                    appointmentId = selectedAppointmentId,
                     onEndCall = { 
                         selectedDoctor = null
+                        selectedCallID = ""
+                        selectedAppointmentId = ""
                         currentScreen = Screen.Home 
                     }
                 )

@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayout
+import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode
+import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutPictureInPictureConfig
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment
 
@@ -18,6 +21,13 @@ class CallActivity : AppCompatActivity() {
         val callID = intent.getStringExtra("callID") ?: ""
         
         val config = ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+        
+        // Ensure the layout is set to Picture-in-Picture (yourself in mini-screen)
+        config.layout = ZegoLayout(
+            ZegoLayoutMode.PICTURE_IN_PICTURE,
+            ZegoLayoutPictureInPictureConfig()
+        )
+        
         val fragment = ZegoUIKitPrebuiltCallFragment.newInstance(
             appID, appSign, userID, userName, callID, config
         )

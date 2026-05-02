@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ZegoCloud ProGuard rules
+-keep class im.zego.zegoexpress.** { *; }
+-keep class com.zegocloud.uikit.** { *; }
+-keep class com.google.android.material.** {*;}
+-keep class androidx.recyclerview.widget.** {*;}

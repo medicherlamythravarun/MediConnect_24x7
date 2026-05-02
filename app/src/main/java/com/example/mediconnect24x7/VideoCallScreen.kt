@@ -16,6 +16,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import androidx.compose.material.icons.filled.Lock
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,16 +27,28 @@ import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.LightGreenBg
 import com.example.mediconnect24x7.ui.theme.PrimaryGreen
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
+fun VideoCallScreen(
+    doctor: Doctor?, 
+    userID: String, 
+    userName: String, 
+    callID: String, 
+    appointmentId: String,
+    onEndCall: () -> Unit
+) {
     val context = LocalContext.current
+    val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
-    val appID: Long = 1201812457L 
-    val appSign = "0b3605d4bf3e72481c477bfc0abb5a06ef137a5e11672edfbff0c051c0a8d775" 
-    
-    val userID = "user_${System.currentTimeMillis() % 10000}"
-    val userName = "Patient_${System.currentTimeMillis() % 10000}"
-    val callID = "doctor_consultation_room" 
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        )
+    )
+
+    val appID: Long = 1971360907
+    val appSign = "33de71963f9d613f1dd5e7b6aed01377b472d039edc972b8435aa8d4b26aecc0"
 
     Box(
         modifier = Modifier
@@ -69,7 +85,7 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = doctor?.name ?: "Dr. Anil Verma",
+                text = doctor?.name ?: "Telehealth Session",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color.DarkGray
@@ -77,7 +93,7 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             )
             
             Text(
-                text = doctor?.specialty ?: "General Physician",
+                text = doctor?.specialty ?: "Video Consultation",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray
                 )
@@ -91,8 +107,8 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = "Ready to connect",
-                    color = PrimaryGreen,
+                    text = if (permissionState.allPermissionsGranted) "Ready to connect" else "Permissions required",
+                    color = if (permissionState.allPermissionsGranted) PrimaryGreen else Color.Red,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
                 )
@@ -102,30 +118,36 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             
             Button(
                 onClick = {
-                    val intent = Intent(context, CallActivity::class.java).apply {
-                        putExtra("appID", appID)
-                        putExtra("appSign", appSign)
-                        putExtra("userID", userID)
-                        putExtra("userName", userName)
-                        putExtra("callID", callID)
+                    if (permissionState.allPermissionsGranted) {
+                        val intent = Intent(context, CallActivity::class.java).apply {
+                            putExtra("appID", appID)
+                            putExtra("appSign", appSign)
+                            putExtra("userID", userID)
+                            putExtra("userName", userName)
+                            putExtra("callID", callID)
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        permissionState.launchMultiplePermissionRequest()
                     }
-                    context.startActivity(intent)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (permissionState.allPermissionsGranted) PrimaryGreen else Color.DarkGray
+                ),
                 shape = RoundedCornerShape(28.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.VideoCall,
+                    imageVector = if (permissionState.allPermissionsGranted) Icons.Default.VideoCall else Icons.Default.Lock,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    "Join Consultation",
+                    if (permissionState.allPermissionsGranted) "Join Consultation" else "Grant Permissions",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -134,14 +156,34 @@ fun VideoCallScreen(doctor: Doctor?, onEndCall: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             
             TextButton(
-                onClick = onEndCall,
+                onClick = {
+                    if (appointmentId.isNotEmpty()) {
+                        firestore.collection("appointments").document(appointmentId)
+                            .update("status", "Completed")
+                            .addOnCompleteListener {
+                                onEndCall()
+                            }
+                    } else {
+                        onEndCall()
+                    }
+                },
                 modifier = Modifier.height(48.dp)
             ) {
                 Text(
-                    "Cancel",
+                    "Cancel or End Call",
                     color = Color.Gray,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
+                )
+            }
+
+            if (!permissionState.allPermissionsGranted && permissionState.shouldShowRationale) {
+                Text(
+                    text = "Camera and Microphone access are needed for the video call.",
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp)
                 )
             }
         }

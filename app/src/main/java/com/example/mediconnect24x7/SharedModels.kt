@@ -17,6 +17,7 @@ data class ServiceItem(
 )
 
 data class Doctor(
+    val uid: String = "",
     val name: String,
     val specialty: String,
     val rating: Double,
@@ -89,11 +90,14 @@ data class DoctorProfile(
 data class Appointment(
     val appointmentId: String = "",
     val clientId: String = "",
+    val clientName: String = "",
     val doctorId: String = "",
+    val participants: List<String> = emptyList(),
     val appointmentDate: String = "",
     val appointmentTime: String = "",
     val status: String = "Pending", // Pending, Confirmed, Cancelled, Completed
-    val meetingId: String = ""
+    val meetingId: String = "",
+    val timestamp: Long = System.currentTimeMillis()
 )
 
 data class Availability(

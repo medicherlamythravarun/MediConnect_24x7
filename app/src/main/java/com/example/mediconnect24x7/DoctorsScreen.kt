@@ -20,11 +20,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
+fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor, String, String) -> Unit = { _, _, _ -> }) {
+
+
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     val firestore = FirebaseFirestore.getInstance()
@@ -48,6 +55,7 @@ fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
                         .addOnSuccessListener { userDoc ->
                             val name = userDoc.getString("name") ?: "Unknown Doctor"
                             doctorList.add(Doctor(
+                                uid = profile.userId,
                                 name = "Dr. $name",
                                 specialty = profile.specialization,
                                 rating = 4.8, // Default rating for now
@@ -110,7 +118,7 @@ fun DoctorConsultationScreen(onNavigateToVideoCall: (Doctor) -> Unit = {}) {
                 EmptyDoctorsView()
             } else {
                 doctors.forEach { doctor ->
-                    DoctorCard(doctor, onNavigateToVideoCall)
+                    DoctorCard(doctor, clientName, onNavigateToVideoCall)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -188,7 +196,15 @@ fun StatCard(value: String, label: String, bgColor: Color, textColor: Color, mod
 }
 
 @Composable
-fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: (Doctor) -> Unit = {}) {
+fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Doctor, String, String) -> Unit = { _, _, _ -> }) {
+
+
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    var isBooking by remember { mutableStateOf(false) }
+
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -271,7 +287,46 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: (Doctor) -> Unit = {}) {
                 }
 
                 Button(
-                    onClick = { if (doctor.status == "Online") onNavigateToVideoCall(doctor) },
+                    onClick = { 
+                        if (doctor.status == "Online" && currentUser != null && !isBooking) {
+                            isBooking = true
+                            val appointmentId = UUID.randomUUID().toString()
+                            val meetingId = "call_${currentUser.uid.take(5)}_${doctor.uid.take(5)}_${System.currentTimeMillis() % 10000}"
+                            
+                            val appointment = Appointment(
+                                appointmentId = appointmentId,
+                                clientId = currentUser.uid,
+                                doctorId = doctor.uid,
+                                appointmentDate = "Today",
+                                appointmentTime = "Now",
+                                status = "Ongoing",
+                                meetingId = meetingId
+                            )
+                            
+                            val appointmentData = hashMapOf(
+                                "appointmentId" to appointmentId,
+                                "clientId" to currentUser.uid,
+                                "clientName" to clientName,
+                                "doctorId" to doctor.uid,
+                                "participants" to listOf(currentUser.uid, doctor.uid),
+                                "appointmentDate" to "Today",
+                                "appointmentTime" to "Now",
+                                "status" to "Ongoing",
+                                "meetingId" to meetingId,
+                                "timestamp" to System.currentTimeMillis()
+                            )
+                            
+                            firestore.collection("appointments").document(appointmentId)
+                                .set(appointmentData)
+                                .addOnSuccessListener {
+                                    isBooking = false
+                                    onNavigateToVideoCall(doctor, meetingId, appointmentId)
+                                }
+                                .addOnFailureListener {
+                                    isBooking = false
+                                }
+                        }
+                    },
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (doctor.status == "Online") PrimaryGreen else Color(0xFFE8F5E9),
@@ -279,9 +334,13 @@ fun DoctorCard(doctor: Doctor, onNavigateToVideoCall: (Doctor) -> Unit = {}) {
                     ),
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
                 ) {
-                    Icon(Icons.Default.Videocam, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (doctor.status == "Online") "Consult" else "Unavailable", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    if (isBooking) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Default.Videocam, null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (doctor.status == "Online") "Consult" else "Unavailable", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }

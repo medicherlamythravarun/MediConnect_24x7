@@ -27,6 +27,7 @@ import com.example.mediconnect24x7.ui.theme.*
 fun MediConnectHomeScreen(
     profilePicUrl: String = "",
     userName: String = "",
+    userRole: String = "client",
     onNavigateToVideoCall: () -> Unit = {},
     onNavigateToDoctors: () -> Unit = {},
     onNavigateToRecords: () -> Unit = {},
@@ -106,6 +107,7 @@ fun MediConnectHomeScreen(
                 color = Color.Black
             )
             ServiceGrid(
+                userRole = userRole,
                 onNavigateToVideoCall = onNavigateToVideoCall,
                 onNavigateToDoctors = onNavigateToDoctors,
                 onNavigateToRecords = onNavigateToRecords,
@@ -188,18 +190,28 @@ fun HealthTipBanner() {
 
 @Composable
 fun ServiceGrid(
+    userRole: String,
     onNavigateToVideoCall: () -> Unit = {},
     onNavigateToDoctors: () -> Unit = {},
     onNavigateToRecords: () -> Unit = {},
     onNavigateToMedicines: () -> Unit = {},
     onNavigateToSymptoms: () -> Unit = {}
 ) {
-    val services = listOf(
-        ServiceItem("Video\nConsultation", "Talk to a doctor now", Icons.Default.Videocam, Color(0xFFE3F2FD), Color(0xFF1976D2), onNavigateToVideoCall),
-        ServiceItem("Health Records", "Your medical history", Icons.Default.Description, Color(0xFFE8F5E9), Color(0xFF388E3C), onNavigateToRecords),
-        ServiceItem("Medicine\nAvailability", "Find nearby pharmacies", Icons.Default.LocalPharmacy, Color(0xFFFFF3E0), Color(0xFFF57C00), onNavigateToMedicines),
-        ServiceItem("Symptom\nChecker", "Check your symptoms", Icons.Default.Analytics, Color(0xFFF3E5F5), Color(0xFF7B1FA2), onNavigateToSymptoms)
-    )
+    val services = if (userRole.lowercase() == "doctor") {
+        listOf(
+            ServiceItem("My\nAppointments", "Manage your schedule", Icons.Default.EventNote, Color(0xFFE3F2FD), Color(0xFF1976D2), onNavigateToDoctors),
+            ServiceItem("Patient\nRecords", "View medical history", Icons.Default.Description, Color(0xFFE8F5E9), Color(0xFF388E3C), onNavigateToRecords),
+            ServiceItem("Write\nPrescriptions", "Create new prescriptions", Icons.Default.NoteAdd, Color(0xFFFFF3E0), Color(0xFFF57C00), onNavigateToMedicines),
+            ServiceItem("Hospital\nUpdates", "Announcements & news", Icons.Default.Campaign, Color(0xFFF3E5F5), Color(0xFF7B1FA2), onNavigateToSymptoms)
+        )
+    } else {
+        listOf(
+            ServiceItem("Video\nConsultation", "Talk to a doctor now", Icons.Default.Videocam, Color(0xFFE3F2FD), Color(0xFF1976D2), onNavigateToVideoCall),
+            ServiceItem("Health Records", "Your medical history", Icons.Default.Description, Color(0xFFE8F5E9), Color(0xFF388E3C), onNavigateToRecords),
+            ServiceItem("Medicine\nAvailability", "Find nearby pharmacies", Icons.Default.LocalPharmacy, Color(0xFFFFF3E0), Color(0xFFF57C00), onNavigateToMedicines),
+            ServiceItem("Symptom\nChecker", "Check your symptoms", Icons.Default.Analytics, Color(0xFFF3E5F5), Color(0xFF7B1FA2), onNavigateToSymptoms)
+        )
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

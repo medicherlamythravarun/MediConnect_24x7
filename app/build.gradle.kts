@@ -41,14 +41,16 @@ android {
 }
 
 dependencies {
-
+    //firebase connectivity
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+    //gen ai
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+")
+    //zego
+    implementation("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:3.+")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation(libs.androidx.core.ktx)
