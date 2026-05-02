@@ -44,6 +44,7 @@ fun MainAppContent() {
     var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
     var selectedCallID by remember { mutableStateOf("") }
     var selectedAppointmentId by remember { mutableStateOf("") }
+    var selectedClientName by remember { mutableStateOf("") }
 
 
     var userRole by remember { mutableStateOf("") }
@@ -143,6 +144,8 @@ fun MainAppContent() {
                     onJoinCall = { appointment ->
                         selectedCallID = appointment.meetingId
                         selectedAppointmentId = appointment.appointmentId
+                        selectedClientName = appointment.clientName
+                        selectedDoctor = null
                         currentScreen = Screen.VideoCall
                     }
                 )
@@ -159,6 +162,7 @@ fun MainAppContent() {
                 )
                 Screen.VideoCall -> VideoCallScreen(
                     doctor = selectedDoctor,
+                    clientName = selectedClientName,
                     userID = auth.currentUser?.uid ?: "user_${System.currentTimeMillis() % 10000}",
                     userName = if (userName.isNotEmpty()) userName else "User_${auth.currentUser?.uid?.take(4)}",
                     callID = selectedCallID,
@@ -167,6 +171,7 @@ fun MainAppContent() {
                         selectedDoctor = null
                         selectedCallID = ""
                         selectedAppointmentId = ""
+                        selectedClientName = ""
                         currentScreen = Screen.Home 
                     }
                 )

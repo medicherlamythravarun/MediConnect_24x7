@@ -32,12 +32,15 @@ class CallActivity : AppCompatActivity() {
             appID, appSign, userID, userName, callID, config
         )
         
+        val containerId = R.id.call_fragment_container
         val frameLayout = FrameLayout(this)
-        frameLayout.id = View.generateViewId()
+        frameLayout.id = containerId
         setContentView(frameLayout)
         
-        supportFragmentManager.beginTransaction()
-            .replace(frameLayout.id, fragment)
-            .commitNow()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(containerId, fragment)
+                .commitNow()
+        }
     }
 }

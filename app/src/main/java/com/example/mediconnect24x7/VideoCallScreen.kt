@@ -31,6 +31,7 @@ import com.example.mediconnect24x7.ui.theme.PrimaryGreen
 @Composable
 fun VideoCallScreen(
     doctor: Doctor?, 
+    clientName: String = "",
     userID: String, 
     userName: String, 
     callID: String, 
@@ -85,7 +86,7 @@ fun VideoCallScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = doctor?.name ?: "Telehealth Session",
+                text = if (doctor != null) doctor.name else if (clientName.isNotEmpty()) "Patient: $clientName" else "Telehealth Session",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color.DarkGray
@@ -93,7 +94,7 @@ fun VideoCallScreen(
             )
             
             Text(
-                text = doctor?.specialty ?: "Video Consultation",
+                text = if (doctor != null) doctor.specialty else "Patient",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray
                 )

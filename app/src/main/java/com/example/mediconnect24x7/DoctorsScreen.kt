@@ -291,7 +291,7 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                         if (doctor.status == "Online" && currentUser != null && !isBooking) {
                             isBooking = true
                             val appointmentId = UUID.randomUUID().toString()
-                            val meetingId = "call_${currentUser.uid.take(5)}_${doctor.uid.take(5)}_${System.currentTimeMillis() % 10000}"
+                            val meetingId = doctor.uid // Use doctor's own ID as the permanent call room
                             
                             val appointment = Appointment(
                                 appointmentId = appointmentId,
