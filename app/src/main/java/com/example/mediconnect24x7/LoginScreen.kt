@@ -26,12 +26,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Brush
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(onLoginSuccess: () -> Unit) {2
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     
@@ -53,34 +58,83 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         }
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "banner")
+    val floatAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+
+    var visible by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    LaunchedEffect(Unit) { visible = true }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F7F6)),
+            .background(Color(0xFFF4F7F6))
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Row(
+        // Animated Banner
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 40.dp, bottom = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+                .height(280.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(GradientStart, GradientEnd)
+                    ),
+                    shape = RoundedCornerShape(bottomStart = 48.dp, bottomEnd = 48.dp)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Default.MedicalServices,
-                contentDescription = null,
-                tint = PremiumTeal,
-                modifier = Modifier.size(28.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                "MediConnect 24/7",
-                color = PremiumTeal,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Surface(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .offset(y = floatAnim.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.2f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Default.MedicalServices,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(50.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    "MediConnect 24/7",
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 28.sp,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    "Smart Healthcare at your fingertips",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(
+                initialOffsetY = { 100 },
+                animationSpec = tween(1000)
+            )
+        ) {
 
         Card(
             modifier = Modifier
@@ -114,20 +168,20 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    "Welcome Back",
-                    fontSize = 30.sp,
+                    "Ready to Consult?",
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black
+                    color = PremiumTeal
                 )
                 Text(
-                    "Log in to access your health portal anytime.",
-                    fontSize = 15.sp,
+                    "Enter your details to connect with top specialists.",
+                    fontSize = 14.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 if (!isOtpSent) {
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -345,8 +399,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 )
             }
         }
+        }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

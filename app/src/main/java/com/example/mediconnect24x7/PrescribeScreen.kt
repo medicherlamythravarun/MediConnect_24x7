@@ -22,6 +22,9 @@ import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +38,10 @@ fun PrescribeScreen() {
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     
+    // History state
+    var pastPrescriptions by remember { mutableStateOf<List<Prescription>>(emptyList()) }
+    var selectedTab by remember { mutableStateOf(0) }
+    
     // Prescription form state
     var medicineName by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
@@ -46,13 +53,20 @@ fun PrescribeScreen() {
             firestore.collection("appointments")
                 .whereEqualTo("doctorId", currentUser.uid)
                 .whereEqualTo("status", "Completed")
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    completedAppointments = querySnapshot.toObjects(Appointment::class.java)
+                .addSnapshotListener { querySnapshot, _ ->
+                    if (querySnapshot != null) {
+                        completedAppointments = querySnapshot.toObjects(Appointment::class.java)
+                    }
                     isLoading = false
                 }
-                .addOnFailureListener {
-                    isLoading = false
+                
+            firestore.collection("prescriptions")
+                .whereEqualTo("doctorId", currentUser.uid)
+                .addSnapshotListener { querySnapshot, _ ->
+                    if (querySnapshot != null) {
+                        pastPrescriptions = querySnapshot.toObjects(Prescription::class.java)
+                            .sortedByDescending { it.timestamp }
+                    }
                 }
         }
     }
@@ -82,22 +96,38 @@ fun PrescribeScreen() {
                 CircularProgressIndicator(color = PremiumTeal)
             }
         } else if (selectedAppointment == null) {
-            // Show list of completed appointments
-            if (completedAppointments.isEmpty()) {
-                EmptyPrescribeView()
-            } else {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Select a completed consultation to prescribe medicines.",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = Color.White,
+                contentColor = PremiumTeal
+            ) {
+                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+                    Text("Pending", modifier = Modifier.padding(16.dp), fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal, color = if (selectedTab == 0) PremiumTeal else Color.Gray)
+                }
+                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+                    Text("History", modifier = Modifier.padding(16.dp), fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal, color = if (selectedTab == 1) PremiumTeal else Color.Gray)
+                }
+            }
+            
+            if (selectedTab == 0) {
+                if (completedAppointments.isEmpty()) {
+                    EmptyPrescribeView("No Consultations Ready", "Only consultations that have ended will appear here.")
+                } else {
+                    LazyColumn(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(completedAppointments) { appointment ->
                             CompletedAppointmentItem(appointment) {
                                 selectedAppointment = appointment
                             }
+                        }
+                    }
+                }
+            } else {
+                if (pastPrescriptions.isEmpty()) {
+                    EmptyPrescribeView("No History", "You haven't prescribed any medicines yet.")
+                } else {
+                    LazyColumn(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(pastPrescriptions) { prescription ->
+                            DoctorPrescriptionCard(prescription)
                         }
                     }
                 }
@@ -126,6 +156,7 @@ fun PrescribeScreen() {
                         "appointmentId" to selectedAppointment!!.appointmentId,
                         "doctorId" to currentUser?.uid,
                         "clientId" to selectedAppointment!!.clientId,
+                        "clientName" to selectedAppointment!!.clientName,
                         "medicineName" to medicineName,
                         "dosage" to dosage,
                         "instructions" to instructions,
@@ -169,8 +200,8 @@ fun CompletedAppointmentItem(appointment: Appointment, onClick: () -> Unit) {
             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PremiumTeal)
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text("Patient ID: ${appointment.clientId.takeLast(6)}", fontWeight = FontWeight.Bold)
-                Text("Date: ${appointment.appointmentDate}", fontSize = 12.sp, color = Color.Gray)
+                Text(appointment.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("ID: ${appointment.clientId.takeLast(6)} · ${appointment.appointmentDate}", fontSize = 12.sp, color = Color.Gray)
             }
             Spacer(modifier = Modifier.weight(1f))
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
@@ -196,14 +227,20 @@ fun PrescriptionForm(
             .padding(24.dp)
     ) {
         Text(
-            "Patient: ${appointment.clientId.takeLast(6)}",
-            fontSize = 18.sp,
+            "Patient: ${appointment.clientName.ifEmpty { "N/A" }}",
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = PremiumTeal
         )
         Text(
-            "Consultation Date: ${appointment.appointmentDate}",
+            "Patient ID: ${appointment.clientId.takeLast(6)}",
             fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.DarkGray
+        )
+        Text(
+            "Consultation Date: ${appointment.appointmentDate}",
+            fontSize = 13.sp,
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 32.dp)
         )
@@ -258,7 +295,34 @@ fun PrescriptionForm(
 }
 
 @Composable
-fun EmptyPrescribeView() {
+fun DoctorPrescriptionCard(prescription: Prescription) {
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    val dateString = sdf.format(Date(prescription.timestamp))
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.MedicalServices, contentDescription = null, tint = PremiumTeal)
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(prescription.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("Medicine: ${prescription.medicineName}", fontSize = 14.sp, color = Color.DarkGray)
+                    Text("Dosage: ${prescription.dosage}", fontSize = 12.sp, color = Color.Gray)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(dateString, fontSize = 12.sp, color = Color.Gray)
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyPrescribeView(title: String = "No Consultations Ready", subtitle: String = "Only consultations that have ended will appear here for prescription. Complete a session to start prescribing.") {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -272,13 +336,13 @@ fun EmptyPrescribeView() {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            "No Consultations Ready",
+            title,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.DarkGray
         )
         Text(
-            "Only consultations that have ended will appear here for prescription. Complete a session to start prescribing.",
+            subtitle,
             fontSize = 14.sp,
             color = Color.Gray,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,

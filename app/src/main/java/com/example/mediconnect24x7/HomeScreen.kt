@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -66,13 +67,42 @@ fun MediConnectHomeScreen(
     ) {
         TopAppBar(
             title = {
-                Text(
-                    "MediConnect",
-                    color = PremiumTeal,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp,
-                    letterSpacing = 0.5.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "MediConnect",
+                        color = PremiumTeal,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                    if (userRole.lowercase() == "doctor") {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = PremiumMint.copy(alpha = 0.2f),
+                            border = BorderStroke(1.dp, PremiumTeal.copy(alpha = 0.3f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Verified, 
+                                    contentDescription = null, 
+                                    tint = PremiumTeal,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    "Doctor",
+                                    color = PremiumTeal,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
             },
             actions = {
                 IconButton(
@@ -175,6 +205,7 @@ fun HeroCard() {
     ) {
         Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
                         colors = listOf(GradientStart, GradientEnd)
@@ -346,7 +377,7 @@ fun ServiceGrid(
 ) {
     val services = if (userRole.lowercase() == "doctor") {
         listOf(
-            ServiceItem("Appointments", "Schedule", Icons.Default.EventNote, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToDoctors),
+            ServiceItem("Appointments", "check", Icons.Default.EventNote, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToDoctors),
             ServiceItem("Records", "History", Icons.Default.Description, Color(0xFFF0FDF4), Color(0xFF16A34A), onNavigateToRecords),
             ServiceItem("Prescriptions", "Create", Icons.Default.NoteAdd, Color(0xFFFFF7ED), Color(0xFFEA580C), onNavigateToMedicines),
             ServiceItem("Symptoms", "Checker", Icons.Default.Analytics, Color(0xFFFDF4FF), Color(0xFFC026D3), onNavigateToSymptoms)

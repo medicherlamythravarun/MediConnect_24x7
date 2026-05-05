@@ -113,3 +113,15 @@ data class AdminProfile(
     val adminId: String = "",
     val userId: String = ""
 )
+
+data class Prescription(
+    val prescriptionId: String = "",
+    val appointmentId: String = "",
+    val doctorId: String = "",
+    val clientId: String = "",
+    val clientName: String = "",
+    val medicineName: String = "",
+    val dosage: String = "",
+    val instructions: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)

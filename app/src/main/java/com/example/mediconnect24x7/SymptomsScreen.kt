@@ -252,9 +252,19 @@ private suspend fun analyzeSymptomsWithGemini(input: String): String {
     return try {
         val generativeModel = GenerativeModel(
             modelName = "gemini-2.5-flash",
-            apiKey = "AIzaSyA9mnIAjVwjaQGc9eztetuQhZJnS30I3L8"
+            apiKey = "AIzaSyA31QZ8QyAidULJZBkWyoroa7YZiB12bGM"
         )
-        val prompt = "You are a helpful medical assistant AI. A user reports the following symptoms: '$input'. Provide a brief, empathetic, and professional recommendation on what they should do next, and suggest which specialist they might want to consult. Do not provide a final diagnosis, always recommend consulting a doctor. Keep the response under 4 sentences."
+        val prompt = """
+            You are a professional medical assistant AI for the MediConnect 24/7 app.
+            Analyze the following symptoms reported by the user: "$input"
+            
+            Provide a concise, empathetic, and professional response (maximum 4 sentences) that includes:
+            1. A brief assessment of the symptoms (without providing a final diagnosis).
+            2. Immediate self-care or safety recommendations.
+            3. The specific type of medical specialist the user should consult.
+            
+            CRITICAL: Always state that this is not a medical diagnosis and that the user must consult a qualified healthcare professional for medical advice.
+        """.trimIndent()
         
         val response = generativeModel.generateContent(prompt)
         response.text ?: "I'm sorry, I couldn't process your request at this time. Please consult a General Physician."
