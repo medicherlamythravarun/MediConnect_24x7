@@ -138,7 +138,8 @@ fun MainAppContent() {
                     onNavigateToRecords = { currentScreen = Screen.Records },
                     onNavigateToMedicines = { currentScreen = if (userRole == "doctor") Screen.Prescribe else Screen.Medicines },
                     onNavigateToSymptoms = { currentScreen = Screen.Symptoms },
-                    onNavigateToProfile = { currentScreen = Screen.Profile }
+                    onNavigateToProfile = { currentScreen = Screen.Profile },
+                    onNavigateToAbout = { currentScreen = Screen.About }
                 )
                 Screen.Appointments -> AppointmentsScreen(
                     onJoinCall = { appointment ->
@@ -183,6 +184,9 @@ fun MainAppContent() {
                         auth.signOut()
                         currentScreen = Screen.Login
                     }
+                )
+                Screen.About -> AboutScreen(
+                    onBack = { currentScreen = Screen.Home }
                 )
             }
         }

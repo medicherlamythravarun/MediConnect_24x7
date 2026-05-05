@@ -50,7 +50,8 @@ fun MediConnectHomeScreen(
     onNavigateToRecords: () -> Unit = {},
     onNavigateToMedicines: () -> Unit = {},
     onNavigateToSymptoms: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {}
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
@@ -159,7 +160,7 @@ fun MediConnectHomeScreen(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                HeroCard()
+                HeroCard(onClick = onNavigateToAbout)
                 HealthTipBanner()
                 Text(
                     text = "How can we help today?",
@@ -184,13 +185,13 @@ fun MediConnectHomeScreen(
 }
 
 @Composable
-fun HeroCard() {
+fun HeroCard(onClick: () -> Unit = {}) {
     val infiniteTransition = rememberInfiniteTransition(label = "hero_pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.02f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
+            animation = tween(1000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "hero_scale"
@@ -199,7 +200,8 @@ fun HeroCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(scale),
+            .scale(scale)
+            .clickable { onClick() },
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
