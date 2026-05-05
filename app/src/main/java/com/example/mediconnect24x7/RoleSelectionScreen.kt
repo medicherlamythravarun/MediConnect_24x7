@@ -19,9 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumMint
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -38,7 +37,7 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(Color(0xFFF4F7F6))
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -47,7 +46,7 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
             text = "Welcome to MediConnect",
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = DarkGreen
+            color = PremiumTeal
         )
         
         Text(
@@ -156,7 +155,7 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+            colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
             enabled = selectedRole != null && !isUpdating
         ) {
             if (isUpdating) {
@@ -182,10 +181,10 @@ fun RoleCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) LightGreenBg else Color.White
+            containerColor = Color.White
         ),
         border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(2.dp, PrimaryGreen)
+            androidx.compose.foundation.BorderStroke(2.dp, PremiumTeal)
         } else {
             androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
         },
@@ -198,13 +197,13 @@ fun RoleCard(
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(14.dp),
-                color = if (isSelected) PrimaryGreen else Color(0xFFF1F8E9)
+                color = PremiumTeal.copy(alpha = 0.08f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = if (isSelected) Color.White else PrimaryGreen,
+                        tint = PremiumTeal,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -217,7 +216,7 @@ fun RoleCard(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = if (isSelected) DarkGreen else Color.Black
+                    color = Color.Black
                 )
                 Text(
                     text = description,

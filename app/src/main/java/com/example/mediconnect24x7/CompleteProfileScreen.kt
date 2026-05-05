@@ -19,9 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
+import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -54,7 +53,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(Color(0xFFF4F7F6))
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -65,7 +64,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
             text = "Almost There!",
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = DarkGreen
+            color = PremiumTeal
         )
         
         Text(
@@ -102,7 +101,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
                     modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.CalendarToday, null, tint = PrimaryGreen)
+                    Icon(Icons.Default.CalendarToday, null, tint = PremiumTeal)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(if (age.isEmpty()) "Select Age" else age, color = if (age.isEmpty()) Color.Gray else Color.Black)
                 }
@@ -126,8 +125,8 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
                     onClick = { gender = label },
                     selected = gender == label,
                     colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = LightGreenBg,
-                        activeContentColor = DarkGreen,
+                        activeContainerColor = PremiumMint.copy(alpha = 0.15f),
+                        activeContentColor = PremiumTeal,
                         inactiveContainerColor = Color.White,
                         inactiveContentColor = Color.Gray
                     )
@@ -188,7 +187,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+            colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
             enabled = !isUpdating
         ) {
             if (isUpdating) {

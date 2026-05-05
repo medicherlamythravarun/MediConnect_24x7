@@ -18,9 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
+import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -61,7 +60,7 @@ fun PrescribeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(Color(0xFFF4F7F6))
     ) {
         TopAppBar(
             title = { Text("Prescribe Medicine", fontWeight = FontWeight.Bold) },
@@ -74,13 +73,13 @@ fun PrescribeScreen() {
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.White,
-                titleContentColor = DarkGreen
+                titleContentColor = PremiumTeal
             )
         )
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryGreen)
+                CircularProgressIndicator(color = PremiumTeal)
             }
         } else if (selectedAppointment == null) {
             // Show list of completed appointments
@@ -167,7 +166,7 @@ fun CompletedAppointmentItem(appointment: Appointment, onClick: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PrimaryGreen)
+            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PremiumTeal)
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text("Patient ID: ${appointment.clientId.takeLast(6)}", fontWeight = FontWeight.Bold)
@@ -200,7 +199,7 @@ fun PrescriptionForm(
             "Patient: ${appointment.clientId.takeLast(6)}",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkGreen
+            color = PremiumTeal
         )
         Text(
             "Consultation Date: ${appointment.appointmentDate}",
@@ -246,7 +245,7 @@ fun PrescriptionForm(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+            colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
             enabled = !isSaving
         ) {
             if (isSaving) {

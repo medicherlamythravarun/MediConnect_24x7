@@ -140,13 +140,13 @@ fun RecordsScreen() {
                         fontSize = 20.sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkGreen)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { filePickerLauncher.launch("*/*") },
-                containerColor = PrimaryGreen,
+                containerColor = PremiumTeal,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Default.UploadFile, contentDescription = "Upload")
@@ -159,16 +159,16 @@ fun RecordsScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
+                .background(Color(0xFFF4F7F6))
         ) {
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 containerColor = Color.White,
-                contentColor = PrimaryGreen,
+                contentColor = PremiumTeal,
                 indicator = { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
                         Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = PrimaryGreen
+                        color = PremiumTeal
                     )
                 }
             ) {
@@ -180,7 +180,7 @@ fun RecordsScreen() {
                             Text(
                                 title, 
                                 fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTabIndex == index) PrimaryGreen else Color.Gray
+                                color = if (selectedTabIndex == index) PremiumTeal else Color.Gray
                             ) 
                         }
                     )
@@ -188,7 +188,7 @@ fun RecordsScreen() {
             }
 
             if (isUploading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = PrimaryGreen)
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = PremiumTeal)
             }
 
             Column(
@@ -223,7 +223,7 @@ fun RecordsScreen() {
 
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = PrimaryGreen)
+                        CircularProgressIndicator(color = PremiumTeal)
                     }
                 } else if (currentListEmpty) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -303,10 +303,10 @@ fun SymptomRecordCard(record: SymptomRecord, onDelete: () -> Unit) {
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(LightGreenBg),
+                            .background(PremiumMint.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.MedicalInformation, null, tint = PrimaryGreen, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.MedicalInformation, null, tint = PremiumTeal, modifier = Modifier.size(20.dp))
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
@@ -342,7 +342,7 @@ fun SymptomRecordCard(record: SymptomRecord, onDelete: () -> Unit) {
                 "Symptoms reported:",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
-                color = DarkGreen
+                color = PremiumTeal
             )
             Text(
                 record.symptoms,
@@ -360,12 +360,12 @@ fun SymptomRecordCard(record: SymptomRecord, onDelete: () -> Unit) {
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AutoAwesome, null, tint = PrimaryGreen, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.AutoAwesome, null, tint = PremiumTeal, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             "AI Suggestion",
                             fontSize = 12.sp,
-                            color = PrimaryGreen,
+                            color = PremiumTeal,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -402,10 +402,10 @@ fun RecordCard(record: HealthRecord) {
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(LightGreenBg),
+                            .background(PremiumMint.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Person, null, tint = PrimaryGreen)
+                        Icon(Icons.Default.Person, null, tint = PremiumTeal)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
@@ -461,12 +461,12 @@ fun RecordCard(record: HealthRecord) {
                     modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.CalendarToday, null, tint = PrimaryGreen, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.CalendarToday, null, tint = PremiumTeal, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         "Last visit: ${record.lastVisitDate} · ${record.lastVisitReason}",
                         fontSize = 12.sp,
-                        color = DarkGreen,
+                        color = PremiumTeal,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -505,13 +505,13 @@ fun ReportRecordCard(record: ReportRecord, onDelete: () -> Unit) {
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(LightGreenBg),
+                            .background(PremiumMint.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             if (isPdf) Icons.Default.PictureAsPdf else Icons.Default.Image, 
                             null, 
-                            tint = PrimaryGreen, 
+                            tint = PremiumTeal, 
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -532,7 +532,7 @@ fun ReportRecordCard(record: ReportRecord, onDelete: () -> Unit) {
                     IconButton(onClick = onDelete) {
                         Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.7f))
                     }
-                    Icon(Icons.Default.CloudDownload, null, tint = PrimaryGreen)
+                    Icon(Icons.Default.CloudDownload, null, tint = PremiumTeal)
                 }
             }
         }

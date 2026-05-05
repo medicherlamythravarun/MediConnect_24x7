@@ -24,8 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumMint
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -56,7 +56,7 @@ fun VideoCallScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(LightGreenBg, Color.White)
+                    colors = listOf(PremiumMint.copy(alpha = 0.15f), Color.White)
                 )
             )
     ) {
@@ -72,13 +72,13 @@ fun VideoCallScreen(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(PrimaryGreen.copy(alpha = 0.1f)),
+                    .background(PremiumTeal.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.LocalHospital,
                     contentDescription = "Doctor Icon",
-                    tint = PrimaryGreen,
+                    tint = PremiumTeal,
                     modifier = Modifier.size(64.dp)
                 )
             }
@@ -103,13 +103,13 @@ fun VideoCallScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Surface(
-                color = LightGreenBg,
+                color = PremiumMint.copy(alpha = 0.15f),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 Text(
                     text = if (permissionState.allPermissionsGranted) "Ready to connect" else "Permissions required",
-                    color = if (permissionState.allPermissionsGranted) PrimaryGreen else Color.Red,
+                    color = if (permissionState.allPermissionsGranted) PremiumTeal else Color.Red,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
                 )
@@ -136,7 +136,7 @@ fun VideoCallScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (permissionState.allPermissionsGranted) PrimaryGreen else Color.DarkGray
+                    containerColor = if (permissionState.allPermissionsGranted) PremiumTeal else Color.DarkGray
                 ),
                 shape = RoundedCornerShape(28.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)

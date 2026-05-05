@@ -56,7 +56,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEDF2EF)),
+            .background(Color(0xFFF4F7F6)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -70,13 +70,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             Icon(
                 Icons.Default.MedicalServices,
                 contentDescription = null,
-                tint = DarkGreen,
+                tint = PremiumTeal,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 "MediConnect 24/7",
-                color = DarkGreen,
+                color = PremiumTeal,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp
             )
@@ -100,13 +100,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(72.dp)
-                        .background(LightGreenBg, CircleShape),
+                        .background(PremiumMint.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.AccountCircle,
                         contentDescription = null,
-                        tint = PrimaryGreen,
+                        tint = PremiumTeal,
                         modifier = Modifier.size(44.dp)
                     )
                 }
@@ -205,7 +205,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             .fillMaxWidth()
                             .height(58.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = DarkGreen),
+                        colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
                         enabled = !isLoading
                     ) {
                         if (isLoading) {
@@ -230,14 +230,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                 color = Color.Black
                             )
                             Surface(
-                                color = Color(0xFFB9F6CA),
+                                color = PremiumMint.copy(alpha = 0.15f),
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
                                     text = String.format("%02d:%02d", timerSeconds / 60, timerSeconds % 60),
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                     fontSize = 13.sp,
-                                    color = DarkGreen,
+                                    color = PremiumTeal,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -268,13 +268,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                     letterSpacing = 12.sp,
                                     fontSize = 26.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = PrimaryGreen
+                                    color = PremiumTeal
                                 ),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.White,
                                     unfocusedContainerColor = Color.White,
-                                    focusedIndicatorColor = PrimaryGreen,
+                                    focusedIndicatorColor = PremiumTeal,
                                     unfocusedIndicatorColor = Color.Transparent
                                 ),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -300,7 +300,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                 .fillMaxWidth()
                                 .height(58.dp),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = DarkGreen),
+                            colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
                             enabled = !isLoading
                         ) {
                             if (isLoading) {
@@ -319,7 +319,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             Text("Didn't receive code? ", color = Color.Gray, fontSize = 15.sp)
                             Text(
                                 "Resend OTP",
-                                color = PrimaryGreen,
+                                color = PremiumTeal,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
                                 modifier = Modifier.padding(start = 4.dp)

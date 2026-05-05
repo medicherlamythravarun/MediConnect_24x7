@@ -19,9 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
+import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -65,19 +64,19 @@ fun AppointmentsScreen(onJoinCall: (Appointment) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(Color(0xFFF4F7F6))
     ) {
         TopAppBar(
             title = { Text("My Appointments", fontWeight = FontWeight.Bold) },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.White,
-                titleContentColor = DarkGreen
+                titleContentColor = PremiumTeal
             )
         )
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryGreen)
+                CircularProgressIndicator(color = PremiumTeal)
             }
         } else if (appointments.isEmpty()) {
             EmptyAppointmentsView()
@@ -108,16 +107,16 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
                 Surface(
                     modifier = Modifier.size(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = LightGreenBg
+                    color = PremiumMint.copy(alpha = 0.15f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryGreen)
+                        Icon(Icons.Default.Person, contentDescription = null, tint = PremiumTeal)
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(appointment.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(appointment.status, color = if (appointment.status == "Confirmed" || appointment.status == "Ongoing") PrimaryGreen else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(appointment.status, color = if (appointment.status == "Confirmed" || appointment.status == "Ongoing") PremiumTeal else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }
             
@@ -143,7 +142,7 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
                 Button(
                     onClick = { onJoinCall(appointment) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                    colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(Icons.Default.Videocam, contentDescription = null)

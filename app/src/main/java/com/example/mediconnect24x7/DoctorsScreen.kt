@@ -88,7 +88,7 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(Color(0xFFF4F7F6))
     ) {
         TopAppBar(
             title = {
@@ -99,7 +99,7 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
                     fontSize = 20.sp
                 )
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkGreen)
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
         )
 
         Column(
@@ -112,7 +112,7 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
             FilterChipBar()
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryGreen)
+                    CircularProgressIndicator(color = PremiumTeal)
                 }
             } else if (doctors.isEmpty()) {
                 EmptyDoctorsView()
@@ -146,16 +146,16 @@ fun FilterChipBar() {
                     Text(
                         filter,
                         fontWeight = FontWeight.Bold,
-                        color = if (filter == selectedFilter) Color.White else PrimaryGreen
+                        color = if (filter == selectedFilter) Color.White else PremiumTeal
                     )
                 },
                 shape = RoundedCornerShape(20.dp),
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = PrimaryGreen,
+                    selectedContainerColor = PremiumTeal,
                     containerColor = Color.White
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    borderColor = if (filter == selectedFilter) PrimaryGreen else Color.LightGray.copy(alpha = 0.5f),
+                    borderColor = if (filter == selectedFilter) PremiumTeal else Color.LightGray.copy(alpha = 0.5f),
                     enabled = true,
                     selected = filter == selectedFilter,
                     borderWidth = 1.dp
@@ -171,7 +171,7 @@ fun StatisticsRow() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard("4", "Available", Color(0xFFE8F5E9), PrimaryGreen, Modifier.weight(1f))
+        StatCard("4", "Available", Color(0xFFE8F5E9), PremiumTeal, Modifier.weight(1f))
         StatCard("6", "Total Doctors", Color(0xFFE3F2FD), Color(0xFF1976D2), Modifier.weight(1f))
         StatCard("~5 min", "Avg Wait", Color(0xFFFFF3E0), Color(0xFFF57C00), Modifier.weight(1f))
     }
@@ -221,12 +221,12 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(LightGreenBg),
+                        .background(PremiumMint.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = doctor.initials,
-                        color = PrimaryGreen,
+                        color = PremiumTeal,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -247,9 +247,9 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
-                        Icon(Icons.Default.Schedule, null, modifier = Modifier.size(14.dp), tint = PrimaryGreen)
+                        Icon(Icons.Default.Schedule, null, modifier = Modifier.size(14.dp), tint = PremiumTeal)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(doctor.availability, fontSize = 12.sp, color = PrimaryGreen, fontWeight = FontWeight.Medium)
+                        Text(doctor.availability, fontSize = 12.sp, color = PremiumTeal, fontWeight = FontWeight.Medium)
                     }
                 }
 
@@ -266,7 +266,7 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(if (doctor.status == "Online") PrimaryGreen else Color.Gray)
+                                .background(if (doctor.status == "Online") PremiumTeal else Color.Gray)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(doctor.status, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
@@ -329,8 +329,8 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                     },
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (doctor.status == "Online") PrimaryGreen else Color(0xFFE8F5E9),
-                        contentColor = if (doctor.status == "Online") Color.White else PrimaryGreen
+                        containerColor = if (doctor.status == "Online") PremiumTeal else Color(0xFFE8F5E9),
+                        contentColor = if (doctor.status == "Online") Color.White else PremiumTeal
                     ),
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
                 ) {

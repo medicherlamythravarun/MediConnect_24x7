@@ -31,10 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.mediconnect24x7.ui.theme.DarkGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.example.mediconnect24x7.ui.theme.EmergencyRed
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -156,7 +155,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = PrimaryGreen)
+            CircularProgressIndicator(color = PremiumTeal)
         }
         return
     }
@@ -173,7 +172,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                 .fillMaxWidth()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(DarkGreen, PrimaryGreen)
+                        colors = listOf(PremiumTeal, PremiumTeal)
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                 )
@@ -242,7 +241,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                             Icons.Default.CameraAlt,
                             contentDescription = "Change Picture",
                             modifier = Modifier.padding(10.dp),
-                            tint = PrimaryGreen
+                            tint = PremiumTeal
                         )
                     }
                 }
@@ -286,7 +285,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                         "Personal Details",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = DarkGreen,
+                        color = PremiumTeal,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     
@@ -319,7 +318,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                                         modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(Icons.Default.CalendarToday, null, tint = PrimaryGreen, modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Default.CalendarToday, null, tint = PremiumTeal, modifier = Modifier.size(20.dp))
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(age.ifBlank { "Set Age" }, color = if (age.isBlank()) Color.Gray else Color.Black)
                                     }
@@ -357,7 +356,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                                                 g,
                                                 fontSize = 13.sp,
                                                 fontWeight = if (gender == g) FontWeight.Bold else FontWeight.Normal,
-                                                color = if (gender == g) PrimaryGreen else Color.Gray
+                                                color = if (gender == g) PremiumTeal else Color.Gray
                                             )
                                         }
                                     }
@@ -380,7 +379,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                         "Contact Information",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = DarkGreen,
+                        color = PremiumTeal,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     
@@ -415,7 +414,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                             "Professional Details",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
-                            color = DarkGreen,
+                            color = PremiumTeal,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         
@@ -491,7 +490,7 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     .fillMaxWidth()
                     .height(60.dp),
                 shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal)
             ) {
                 Text("Save Changes", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             }
@@ -536,7 +535,7 @@ fun AgePickerDialog(
                                 .padding(vertical = 14.dp),
                             fontSize = 18.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            color = if (currentAge == i.toString()) PrimaryGreen else Color.Black,
+                            color = if (currentAge == i.toString()) PremiumTeal else Color.Black,
                             fontWeight = if (currentAge == i.toString()) FontWeight.ExtraBold else FontWeight.Normal
                         )
                     }
@@ -589,12 +588,12 @@ fun ProfileField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(icon, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(20.dp)) },
+            leadingIcon = { Icon(icon, contentDescription = null, tint = PremiumTeal, modifier = Modifier.size(20.dp)) },
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryGreen,
+                focusedBorderColor = PremiumTeal,
                 unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                cursorColor = PrimaryGreen,
+                cursorColor = PremiumTeal,
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White
             ),

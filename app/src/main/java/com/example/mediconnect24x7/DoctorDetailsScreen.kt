@@ -23,8 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -52,7 +51,7 @@ fun DoctorDetailsScreen(onComplete: () -> Unit, onBack: () -> Unit) {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White,
-                    titleContentColor = DarkGreen
+                    titleContentColor = PremiumTeal
                 )
             )
         }
@@ -60,7 +59,7 @@ fun DoctorDetailsScreen(onComplete: () -> Unit, onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Color(0xFFF4F7F6))
                 .padding(paddingValues)
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
@@ -70,7 +69,7 @@ fun DoctorDetailsScreen(onComplete: () -> Unit, onBack: () -> Unit) {
                 text = "Complete Your Profile",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = DarkGreen,
+                color = PremiumTeal,
                 modifier = Modifier.align(Alignment.Start)
             )
             
@@ -148,7 +147,7 @@ fun DoctorDetailsScreen(onComplete: () -> Unit, onBack: () -> Unit) {
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
                 enabled = !isUpdating
             ) {
                 if (isUpdating) {
@@ -175,14 +174,14 @@ fun DetailInputField(
         onValueChange = onValueChange,
         label = { Text(label) },
         placeholder = { Text(placeholder) },
-        leadingIcon = { Icon(icon, contentDescription = null, tint = PrimaryGreen) },
+        leadingIcon = { Icon(icon, contentDescription = null, tint = PremiumTeal) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = PrimaryGreen,
+            focusedBorderColor = PremiumTeal,
             unfocusedBorderColor = Color.LightGray,
-            focusedLabelColor = PrimaryGreen
+            focusedLabelColor = PremiumTeal
         ),
         singleLine = true
     )

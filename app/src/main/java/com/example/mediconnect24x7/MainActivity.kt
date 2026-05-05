@@ -207,11 +207,11 @@ fun BottomNavigationBar(
             icon = { Icon(if (currentScreen == Screen.Home) Icons.Default.Home else Icons.Outlined.Home, null) },
             label = { Text("Home", fontSize = 10.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PremiumTeal,
+                selectedTextColor = PremiumTeal,
                 unselectedIconColor = Color.LightGray,
                 unselectedTextColor = Color.LightGray,
-                indicatorColor = LightGreenBg
+                indicatorColor = PremiumMint.copy(alpha = 0.15f)
             )
         )
         
@@ -222,11 +222,11 @@ fun BottomNavigationBar(
                 icon = { Icon(if (currentScreen == Screen.Doctors) Icons.Default.MedicalServices else Icons.Outlined.MedicalServices, null) },
                 label = { Text("Doctors", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryGreen,
-                    selectedTextColor = PrimaryGreen,
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
                     unselectedIconColor = Color.LightGray,
                     unselectedTextColor = Color.LightGray,
-                    indicatorColor = LightGreenBg
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
                 )
             )
         } else {
@@ -236,11 +236,11 @@ fun BottomNavigationBar(
                 icon = { Icon(if (currentScreen == Screen.Appointments) Icons.Default.EventNote else Icons.Outlined.EventNote, null) },
                 label = { Text("Upcoming", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryGreen,
-                    selectedTextColor = PrimaryGreen,
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
                     unselectedIconColor = Color.LightGray,
                     unselectedTextColor = Color.LightGray,
-                    indicatorColor = LightGreenBg
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
                 )
             )
         }
@@ -250,11 +250,11 @@ fun BottomNavigationBar(
             icon = { Icon(if (currentScreen == Screen.Records) Icons.Default.Folder else Icons.Outlined.Folder, null) },
             label = { Text("Records", fontSize = 10.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PremiumTeal,
+                selectedTextColor = PremiumTeal,
                 unselectedIconColor = Color.LightGray,
                 unselectedTextColor = Color.LightGray,
-                indicatorColor = LightGreenBg
+                indicatorColor = PremiumMint.copy(alpha = 0.15f)
             )
         )
         if (userRole.lowercase() != "doctor") {
@@ -264,11 +264,11 @@ fun BottomNavigationBar(
                 icon = { Icon(if (currentScreen == Screen.Medicines) Icons.Default.LocalPharmacy else Icons.Outlined.LocalPharmacy, null) },
                 label = { Text("Medicines", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryGreen,
-                    selectedTextColor = PrimaryGreen,
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
                     unselectedIconColor = Color.LightGray,
                     unselectedTextColor = Color.LightGray,
-                    indicatorColor = LightGreenBg
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
                 )
             )
         } else {
@@ -278,11 +278,11 @@ fun BottomNavigationBar(
                 icon = { Icon(if (currentScreen == Screen.Prescribe) Icons.Default.NoteAdd else Icons.Outlined.NoteAdd, null) },
                 label = { Text("Prescribe", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryGreen,
-                    selectedTextColor = PrimaryGreen,
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
                     unselectedIconColor = Color.LightGray,
                     unselectedTextColor = Color.LightGray,
-                    indicatorColor = LightGreenBg
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
                 )
             )
         }
@@ -292,11 +292,11 @@ fun BottomNavigationBar(
             icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
             label = { Text("Symptoms", fontSize = 10.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PremiumTeal,
+                selectedTextColor = PremiumTeal,
                 unselectedIconColor = Color.LightGray,
                 unselectedTextColor = Color.LightGray,
-                indicatorColor = LightGreenBg
+                indicatorColor = PremiumMint.copy(alpha = 0.15f)
             )
         )
     }

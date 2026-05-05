@@ -85,14 +85,14 @@ fun SymptomsScreen() {
                         fontSize = 20.sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkGreen)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Color(0xFFF4F7F6))
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -116,7 +116,7 @@ fun SymptomsScreen() {
                 placeholder = { Text("E.g., I have a severe headache and feel nauseous...") },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PrimaryGreen,
+                    focusedBorderColor = PremiumTeal,
                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White
@@ -163,7 +163,7 @@ fun SymptomsScreen() {
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
                 enabled = !isLoading && symptomText.isNotBlank()
             ) {
                 if (isLoading) {
@@ -190,14 +190,14 @@ fun SymptomsScreen() {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = LightGreenBg),
+                    colors = CardDefaults.cardColors(containerColor = PremiumMint.copy(alpha = 0.15f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = "AI Recommendation",
                             fontWeight = FontWeight.ExtraBold,
-                            color = DarkGreen,
+                            color = PremiumTeal,
                             fontSize = 18.sp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -234,7 +234,7 @@ fun SymptomsScreen() {
                         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                     }
                 },
-                containerColor = PrimaryGreen,
+                containerColor = PremiumTeal,
                 contentColor = Color.White,
                 shape = CircleShape,
                 modifier = Modifier

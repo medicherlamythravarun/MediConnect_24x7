@@ -31,9 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.mediconnect24x7.ui.theme.DarkGreen
-import com.example.mediconnect24x7.ui.theme.LightGreenBg
-import com.example.mediconnect24x7.ui.theme.PrimaryGreen
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
+import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -91,13 +90,13 @@ fun MedicinesScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Medicine Tracker", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkGreen)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = PrimaryGreen,
+                containerColor = PremiumTeal,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Medicine")
@@ -109,11 +108,11 @@ fun MedicinesScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Color(0xFFF4F7F6))
                 .padding(paddingValues)
         ) {
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = PrimaryGreen)
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = PremiumTeal)
             } else if (medicines.isEmpty()) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
@@ -184,16 +183,16 @@ fun MedicineCard(medicine: MedicineRecord) {
         else -> Icons.Default.MedicalServices
     }
     
-    val cardBgColor = if (medicine.isTakenToday) LightGreenBg else Color.White
+    val cardBgColor = if (medicine.isTakenToday) PremiumMint.copy(alpha = 0.15f) else Color.White
     val textColor = if (medicine.isTakenToday) Color.Gray else Color.Black
-    val iconColor = if (medicine.isTakenToday) PrimaryGreen.copy(alpha = 0.5f) else PrimaryGreen
+    val iconColor = if (medicine.isTakenToday) PremiumTeal.copy(alpha = 0.5f) else PremiumTeal
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = cardBgColor),
         elevation = CardDefaults.cardElevation(defaultElevation = if (medicine.isTakenToday) 0.dp else 2.dp),
-        border = BorderStroke(1.dp, if (medicine.isTakenToday) PrimaryGreen.copy(alpha = 0.3f) else Color.LightGray.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, if (medicine.isTakenToday) PremiumTeal.copy(alpha = 0.3f) else Color.LightGray.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier
@@ -205,7 +204,7 @@ fun MedicineCard(medicine: MedicineRecord) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(if (medicine.isTakenToday) Color.Transparent else LightGreenBg),
+                    .background(if (medicine.isTakenToday) Color.Transparent else PremiumMint.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(formIcon, contentDescription = null, tint = iconColor, modifier = Modifier.size(24.dp))
@@ -236,8 +235,8 @@ fun MedicineCard(medicine: MedicineRecord) {
                 }
             }
             
-            val buttonBgColor by animateColorAsState(if (medicine.isTakenToday) PrimaryGreen.copy(alpha = 0.15f) else PrimaryGreen)
-            val buttonTextColor by animateColorAsState(if (medicine.isTakenToday) PrimaryGreen else Color.White)
+            val buttonBgColor by animateColorAsState(if (medicine.isTakenToday) PremiumTeal.copy(alpha = 0.15f) else PremiumTeal)
+            val buttonTextColor by animateColorAsState(if (medicine.isTakenToday) PremiumTeal else Color.White)
 
             Surface(
                 modifier = Modifier
@@ -344,14 +343,14 @@ fun AddMedicineDialog(onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Medicine", fontWeight = FontWeight.Bold, color = DarkGreen) },
+        title = { Text("Add Medicine", fontWeight = FontWeight.Bold, color = PremiumTeal) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (isScanning) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("AI is scanning...", color = PrimaryGreen)
+                        Text("AI is scanning...", color = PremiumTeal)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -369,7 +368,7 @@ fun AddMedicineDialog(onDismiss: () -> Unit) {
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9), contentColor = PrimaryGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9), contentColor = PremiumTeal)
                 ) {
                     Icon(Icons.Default.AutoAwesome, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -454,7 +453,7 @@ fun AddMedicineDialog(onDismiss: () -> Unit) {
                         }
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal)
             ) {
                 Text("Save Medicine")
             }
