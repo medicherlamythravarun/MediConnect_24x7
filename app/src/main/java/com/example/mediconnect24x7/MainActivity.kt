@@ -139,7 +139,8 @@ fun MainAppContent() {
                     onNavigateToMedicines = { currentScreen = if (userRole == "doctor") Screen.Prescribe else Screen.Medicines },
                     onNavigateToSymptoms = { currentScreen = Screen.Symptoms },
                     onNavigateToProfile = { currentScreen = Screen.Profile },
-                    onNavigateToAbout = { currentScreen = Screen.About }
+                    onNavigateToAbout = { currentScreen = Screen.About },
+                    onNavigateToAdminUsers = { currentScreen = Screen.AdminUsers }
                 )
                 Screen.Appointments -> AppointmentsScreen(
                     onJoinCall = { appointment ->
@@ -188,6 +189,7 @@ fun MainAppContent() {
                 Screen.About -> AboutScreen(
                     onBack = { currentScreen = Screen.Home }
                 )
+                Screen.AdminUsers -> AdminUsersScreen()
             }
         }
     }
@@ -219,12 +221,12 @@ fun BottomNavigationBar(
             )
         )
         
-        if (userRole.lowercase() != "doctor") {
+        if (userRole.lowercase() == "admin") {
             NavigationBarItem(
-                selected = currentScreen == Screen.Doctors,
-                onClick = { onScreenSelected(Screen.Doctors) },
-                icon = { Icon(if (currentScreen == Screen.Doctors) Icons.Default.MedicalServices else Icons.Outlined.MedicalServices, null) },
-                label = { Text("Doctors", fontSize = 10.sp) },
+                selected = currentScreen == Screen.AdminUsers,
+                onClick = { onScreenSelected(Screen.AdminUsers) },
+                icon = { Icon(if (currentScreen == Screen.AdminUsers) Icons.Default.People else Icons.Outlined.People, null) },
+                label = { Text("Users", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = PremiumTeal,
                     selectedTextColor = PremiumTeal,
@@ -234,11 +236,82 @@ fun BottomNavigationBar(
                 )
             )
         } else {
+            if (userRole.lowercase() != "doctor") {
+                NavigationBarItem(
+                    selected = currentScreen == Screen.Doctors,
+                    onClick = { onScreenSelected(Screen.Doctors) },
+                    icon = { Icon(if (currentScreen == Screen.Doctors) Icons.Default.MedicalServices else Icons.Outlined.MedicalServices, null) },
+                    label = { Text("Doctors", fontSize = 10.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = PremiumTeal,
+                        selectedTextColor = PremiumTeal,
+                        unselectedIconColor = Color.LightGray,
+                        unselectedTextColor = Color.LightGray,
+                        indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                    )
+                )
+            } else {
+                NavigationBarItem(
+                    selected = currentScreen == Screen.Appointments,
+                    onClick = { onScreenSelected(Screen.Appointments) },
+                    icon = { Icon(if (currentScreen == Screen.Appointments) Icons.Default.EventNote else Icons.Outlined.EventNote, null) },
+                    label = { Text("Upcoming", fontSize = 10.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = PremiumTeal,
+                        selectedTextColor = PremiumTeal,
+                        unselectedIconColor = Color.LightGray,
+                        unselectedTextColor = Color.LightGray,
+                        indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                    )
+                )
+            }
             NavigationBarItem(
-                selected = currentScreen == Screen.Appointments,
-                onClick = { onScreenSelected(Screen.Appointments) },
-                icon = { Icon(if (currentScreen == Screen.Appointments) Icons.Default.EventNote else Icons.Outlined.EventNote, null) },
-                label = { Text("Upcoming", fontSize = 10.sp) },
+                selected = currentScreen == Screen.Records,
+                onClick = { onScreenSelected(Screen.Records) },
+                icon = { Icon(if (currentScreen == Screen.Records) Icons.Default.Folder else Icons.Outlined.Folder, null) },
+                label = { Text("Records", fontSize = 10.sp) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
+                    unselectedIconColor = Color.LightGray,
+                    unselectedTextColor = Color.LightGray,
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                )
+            )
+            if (userRole.lowercase() != "doctor") {
+                NavigationBarItem(
+                    selected = currentScreen == Screen.Medicines,
+                    onClick = { onScreenSelected(Screen.Medicines) },
+                    icon = { Icon(if (currentScreen == Screen.Medicines) Icons.Default.LocalPharmacy else Icons.Outlined.LocalPharmacy, null) },
+                    label = { Text("Medicines", fontSize = 10.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = PremiumTeal,
+                        selectedTextColor = PremiumTeal,
+                        unselectedIconColor = Color.LightGray,
+                        unselectedTextColor = Color.LightGray,
+                        indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                    )
+                )
+            } else {
+                NavigationBarItem(
+                    selected = currentScreen == Screen.Prescribe,
+                    onClick = { onScreenSelected(Screen.Prescribe) },
+                    icon = { Icon(if (currentScreen == Screen.Prescribe) Icons.Default.NoteAdd else Icons.Outlined.NoteAdd, null) },
+                    label = { Text("Prescribe", fontSize = 10.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = PremiumTeal,
+                        selectedTextColor = PremiumTeal,
+                        unselectedIconColor = Color.LightGray,
+                        unselectedTextColor = Color.LightGray,
+                        indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                    )
+                )
+            }
+            NavigationBarItem(
+                selected = currentScreen == Screen.Symptoms,
+                onClick = { onScreenSelected(Screen.Symptoms) },
+                icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
+                label = { Text("Symptoms", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = PremiumTeal,
                     selectedTextColor = PremiumTeal,
@@ -248,60 +321,5 @@ fun BottomNavigationBar(
                 )
             )
         }
-        NavigationBarItem(
-            selected = currentScreen == Screen.Records,
-            onClick = { onScreenSelected(Screen.Records) },
-            icon = { Icon(if (currentScreen == Screen.Records) Icons.Default.Folder else Icons.Outlined.Folder, null) },
-            label = { Text("Records", fontSize = 10.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PremiumTeal,
-                selectedTextColor = PremiumTeal,
-                unselectedIconColor = Color.LightGray,
-                unselectedTextColor = Color.LightGray,
-                indicatorColor = PremiumMint.copy(alpha = 0.15f)
-            )
-        )
-        if (userRole.lowercase() != "doctor") {
-            NavigationBarItem(
-                selected = currentScreen == Screen.Medicines,
-                onClick = { onScreenSelected(Screen.Medicines) },
-                icon = { Icon(if (currentScreen == Screen.Medicines) Icons.Default.LocalPharmacy else Icons.Outlined.LocalPharmacy, null) },
-                label = { Text("Medicines", fontSize = 10.sp) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PremiumTeal,
-                    selectedTextColor = PremiumTeal,
-                    unselectedIconColor = Color.LightGray,
-                    unselectedTextColor = Color.LightGray,
-                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
-                )
-            )
-        } else {
-            NavigationBarItem(
-                selected = currentScreen == Screen.Prescribe,
-                onClick = { onScreenSelected(Screen.Prescribe) },
-                icon = { Icon(if (currentScreen == Screen.Prescribe) Icons.Default.NoteAdd else Icons.Outlined.NoteAdd, null) },
-                label = { Text("Prescribe", fontSize = 10.sp) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PremiumTeal,
-                    selectedTextColor = PremiumTeal,
-                    unselectedIconColor = Color.LightGray,
-                    unselectedTextColor = Color.LightGray,
-                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
-                )
-            )
-        }
-        NavigationBarItem(
-            selected = currentScreen == Screen.Symptoms,
-            onClick = { onScreenSelected(Screen.Symptoms) },
-            icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
-            label = { Text("Symptoms", fontSize = 10.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PremiumTeal,
-                selectedTextColor = PremiumTeal,
-                unselectedIconColor = Color.LightGray,
-                unselectedTextColor = Color.LightGray,
-                indicatorColor = PremiumMint.copy(alpha = 0.15f)
-            )
-        )
     }
 }

@@ -51,7 +51,8 @@ fun MediConnectHomeScreen(
     onNavigateToMedicines: () -> Unit = {},
     onNavigateToSymptoms: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
-    onNavigateToAbout: () -> Unit = {}
+    onNavigateToAbout: () -> Unit = {},
+    onNavigateToAdminUsers: () -> Unit = {}
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
@@ -97,6 +98,32 @@ fun MediConnectHomeScreen(
                                 Text(
                                     "Doctor",
                                     color = PremiumTeal,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    } else if (userRole.lowercase() == "admin") {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFFEE2E2), // Light Red for admin badge
+                            border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Security, 
+                                    contentDescription = null, 
+                                    tint = Color(0xFFEF4444),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    "Admin",
+                                    color = Color(0xFFEF4444),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp
                                 )
@@ -175,7 +202,8 @@ fun MediConnectHomeScreen(
                     onNavigateToDoctors = onNavigateToDoctors,
                     onNavigateToRecords = onNavigateToRecords,
                     onNavigateToMedicines = onNavigateToMedicines,
-                    onNavigateToSymptoms = onNavigateToSymptoms
+                    onNavigateToSymptoms = onNavigateToSymptoms,
+                    onNavigateToAdminUsers = onNavigateToAdminUsers
                 )
                 EmergencyCard()
             }
@@ -375,7 +403,8 @@ fun ServiceGrid(
     onNavigateToDoctors: () -> Unit,
     onNavigateToRecords: () -> Unit,
     onNavigateToMedicines: () -> Unit,
-    onNavigateToSymptoms: () -> Unit
+    onNavigateToSymptoms: () -> Unit,
+    onNavigateToAdminUsers: () -> Unit = {}
 ) {
     val services = if (userRole.lowercase() == "doctor") {
         listOf(
@@ -383,6 +412,13 @@ fun ServiceGrid(
             ServiceItem("Records", "History", Icons.Default.Description, Color(0xFFF0FDF4), Color(0xFF16A34A), onNavigateToRecords),
             ServiceItem("Prescriptions", "Create", Icons.Default.NoteAdd, Color(0xFFFFF7ED), Color(0xFFEA580C), onNavigateToMedicines),
             ServiceItem("Symptoms", "Checker", Icons.Default.Analytics, Color(0xFFFDF4FF), Color(0xFFC026D3), onNavigateToSymptoms)
+        )
+    } else if (userRole.lowercase() == "admin") {
+        listOf(
+            ServiceItem("Users", "Manage all users", Icons.Default.People, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToAdminUsers),
+            ServiceItem("Analytics", "System stats", Icons.Default.Analytics, Color(0xFFF0FDF4), Color(0xFF16A34A), {}),
+            ServiceItem("Reports", "View reports", Icons.Default.Description, Color(0xFFFFF7ED), Color(0xFFEA580C), {}),
+            ServiceItem("Settings", "App config", Icons.Default.Settings, Color(0xFFFDF4FF), Color(0xFFC026D3), {})
         )
     } else {
         listOf(

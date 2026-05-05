@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -227,7 +229,29 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent
                                 ),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Phone,
+                                    imeAction = ImeAction.Send
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onSend = {
+                                        if (phoneNumber.length == 10 && !isLoading) {
+                                            isLoading = true
+                                            errorMessage = null
+                                            sendOtp(auth, "+91$phoneNumber", context as Activity, 
+                                                onCodeSent = { id -> 
+                                                    verificationId = id
+                                                    isOtpSent = true 
+                                                    isLoading = false
+                                                },
+                                                onError = { 
+                                                    errorMessage = it
+                                                    isLoading = false
+                                                }
+                                            )
+                                        }
+                                    }
+                                ),
                                 singleLine = true
                             )
                         }
@@ -331,7 +355,24 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
                                     focusedIndicatorColor = PremiumTeal,
                                     unfocusedIndicatorColor = Color.Transparent
                                 ),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        if (otpCode.length == 6 && !isLoading) {
+                                            isLoading = true
+                                            verifyCode(auth, verificationId, otpCode, 
+                                                onSuccess = { onLoginSuccess() },
+                                                onError = { 
+                                                    errorMessage = it
+                                                    isLoading = false
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
                             )
                         }
 

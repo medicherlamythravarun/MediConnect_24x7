@@ -34,7 +34,26 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
 
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedFilter by remember { mutableStateOf("All") }
     val firestore = FirebaseFirestore.getInstance()
+
+    val filteredDoctors = remember(doctors, searchQuery, selectedFilter) {
+        doctors.filter { doctor ->
+            val matchesSearch = doctor.name.contains(searchQuery, ignoreCase = true) || 
+                              doctor.specialty.contains(searchQuery, ignoreCase = true)
+            
+            val matchesFilter = when (selectedFilter) {
+                "All" -> true
+                "Available" -> doctor.status == "Online"
+                "General" -> doctor.specialty.contains("General", ignoreCase = true)
+                "Specialist" -> !doctor.specialty.contains("General", ignoreCase = true)
+                else -> true
+            }
+            
+            matchesSearch && matchesFilter
+        }
+    }
 
     LaunchedEffect(Unit) {
         firestore.collection("doctors").get()
@@ -105,43 +124,79 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            FilterChipBar()
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Search Engine Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp)),
+                placeholder = { Text("Search by name or specialty...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PremiumTeal) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear search", tint = Color.Gray)
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = PremiumTeal,
+                    unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
+                ),
+                singleLine = true
+            )
+
+            FilterChipBar(
+                selectedFilter = selectedFilter,
+                onFilterSelected = { selectedFilter = it }
+            )
+
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = PremiumTeal)
                 }
-            } else if (doctors.isEmpty()) {
+            } else if (filteredDoctors.isEmpty()) {
                 EmptyDoctorsView()
             } else {
-                doctors.forEach { doctor ->
-                    DoctorCard(doctor, clientName, onNavigateToVideoCall)
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    filteredDoctors.forEach { doctor ->
+                        DoctorCard(doctor, clientName, onNavigateToVideoCall)
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun FilterChipBar() {
+fun FilterChipBar(selectedFilter: String, onFilterSelected: (String) -> Unit) {
     val filters = listOf("All", "Available", "General", "Specialist")
-    var selectedFilter by remember { mutableStateOf("Specialist") }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(vertical = 8.dp),
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         filters.forEach { filter ->
             FilterChip(
                 selected = filter == selectedFilter,
-                onClick = { selectedFilter = filter },
+                onClick = { onFilterSelected(filter) },
                 label = {
                     Text(
                         filter,
