@@ -138,8 +138,18 @@ fun MediConnectHomeScreen(
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
                     if (profilePicUrl.isNotEmpty()) {
+                        val model = if (profilePicUrl.startsWith("data:image")) {
+                            try {
+                                val base64String = profilePicUrl.substringAfter("base64,")
+                                android.util.Base64.decode(base64String, android.util.Base64.DEFAULT)
+                            } catch(e: Exception) {
+                                profilePicUrl
+                            }
+                        } else {
+                            profilePicUrl
+                        }
                         androidx.compose.foundation.Image(
-                            painter = rememberAsyncImagePainter(profilePicUrl),
+                            painter = rememberAsyncImagePainter(model),
                             contentDescription = "Profile",
                             modifier = Modifier
                                 .size(38.dp)

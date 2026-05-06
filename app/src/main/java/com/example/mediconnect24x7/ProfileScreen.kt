@@ -38,6 +38,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,40 +67,41 @@ fun ProfileScreen(onSignOut: () -> Unit) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var isUploading by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
+
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             if (uri != null) {
                 isUploading = true
-                uploadProfilePicture(
-                    storage = storage,
-                    userId = currentUser?.uid ?: "",
-                    imageUri = uri,
-                    onSuccess = { url ->
-                        profilePicUrl = url
-                        isUploading = false
-                        // Auto-save to Firestore immediately
-                        if (currentUser != null) {
-                            firestore.collection("users").document(currentUser.uid)
-                                .update("profilePicUrl", url)
-                                .addOnSuccessListener {
-                                    Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
-                                }
-                                .addOnFailureListener { e ->
-                                    // If document doesn't exist yet, we might need to use set with merge
-                                    firestore.collection("users").document(currentUser.uid)
-                                        .set(mapOf("profilePicUrl" to url), SetOptions.merge())
-                                        .addOnSuccessListener {
-                                            Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
-                                        }
-                                }
+                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    val base64Image = compressAndEncodeImage(context, uri)
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        if (base64Image != null) {
+                            profilePicUrl = base64Image
+                            isUploading = false
+                            // Auto-save to Firestore immediately
+                            if (currentUser != null) {
+                                firestore.collection("users").document(currentUser.uid)
+                                    .update("profilePicUrl", base64Image)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener {
+                                        // If document doesn't exist yet, we might need to use set with merge
+                                        firestore.collection("users").document(currentUser.uid)
+                                            .set(mapOf("profilePicUrl" to base64Image), SetOptions.merge())
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                            }
+                        } else {
+                            isUploading = false
+                            Toast.makeText(context, "Upload failed: Could not process image", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    onFailure = { e ->
-                        isUploading = false
-                        Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
-                )
+                }
             }
         }
     )
@@ -216,8 +218,18 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                         contentAlignment = Alignment.Center
                     ) {
                         if (profilePicUrl.isNotEmpty()) {
+                            val model = if (profilePicUrl.startsWith("data:image")) {
+                                try {
+                                    val base64String = profilePicUrl.substringAfter("base64,")
+                                    android.util.Base64.decode(base64String, android.util.Base64.DEFAULT)
+                                } catch(e: Exception) {
+                                    profilePicUrl
+                                }
+                            } else {
+                                profilePicUrl
+                            }
                             Image(
-                                painter = rememberAsyncImagePainter(profilePicUrl),
+                                painter = rememberAsyncImagePainter(model),
                                 contentDescription = "Profile Picture",
                                 modifier = Modifier.fillMaxSize().clip(CircleShape),
                                 contentScale = ContentScale.Crop
@@ -565,25 +577,51 @@ fun AgePickerDialog(
     )
 }
 
-private fun uploadProfilePicture(
-    storage: FirebaseStorage,
-    userId: String,
-    imageUri: Uri,
-    onSuccess: (String) -> Unit,
-    onFailure: (Exception) -> Unit
-) {
-    val ref = storage.reference.child("profile_pics/$userId.jpg")
-    ref.putFile(imageUri)
-        .continueWithTask { task ->
-            if (!task.isSuccessful) task.exception?.let { throw it }
-            ref.downloadUrl
+private fun compressAndEncodeImage(context: android.content.Context, uri: Uri): String? {
+    return try {
+        // Check for rotation in EXIF data
+        var rotationDegrees = 0f
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            val exif = android.media.ExifInterface(stream)
+            val orientation = exif.getAttributeInt(
+                android.media.ExifInterface.TAG_ORIENTATION,
+                android.media.ExifInterface.ORIENTATION_NORMAL
+            )
+            rotationDegrees = when (orientation) {
+                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                else -> 0f
+            }
         }
-        .addOnSuccessListener { url ->
-            onSuccess(url.toString())
+
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+        
+        if (originalBitmap == null) return null
+        
+        val maxWidth = 500
+        val maxHeight = 500
+        val scale = Math.min(maxWidth.toFloat() / originalBitmap.width, maxHeight.toFloat() / originalBitmap.height)
+        
+        val scaledBitmap = if (scale < 1f || rotationDegrees != 0f) {
+            val matrix = android.graphics.Matrix()
+            if (scale < 1f) matrix.postScale(scale, scale)
+            if (rotationDegrees != 0f) matrix.postRotate(rotationDegrees)
+            android.graphics.Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
+        } else {
+            originalBitmap
         }
-        .addOnFailureListener { e ->
-            onFailure(e)
-        }
+        
+        val outputStream = java.io.ByteArrayOutputStream()
+        scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 70, outputStream)
+        val byteArray = outputStream.toByteArray()
+        
+        "data:image/jpeg;base64," + android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
+    } catch (e: Exception) {
+        null
+    }
 }
 
 @Composable

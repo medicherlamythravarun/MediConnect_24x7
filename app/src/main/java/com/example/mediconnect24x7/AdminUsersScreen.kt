@@ -145,8 +145,18 @@ fun AnimatedUserCard(user: UserProfile) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (user.profilePicUrl.isNotEmpty()) {
+                    val model = if (user.profilePicUrl.startsWith("data:image")) {
+                        try {
+                            val base64String = user.profilePicUrl.substringAfter("base64,")
+                            android.util.Base64.decode(base64String, android.util.Base64.DEFAULT)
+                        } catch(e: Exception) {
+                            user.profilePicUrl
+                        }
+                    } else {
+                        user.profilePicUrl
+                    }
                     androidx.compose.foundation.Image(
-                        painter = rememberAsyncImagePainter(user.profilePicUrl),
+                        painter = rememberAsyncImagePainter(model),
                         contentDescription = "Profile Pic",
                         modifier = Modifier
                             .size(60.dp)
