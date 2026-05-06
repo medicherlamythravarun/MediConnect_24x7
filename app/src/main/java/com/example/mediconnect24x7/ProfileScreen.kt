@@ -36,6 +36,7 @@ import com.example.mediconnect24x7.ui.theme.EmergencyRed
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +78,22 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     onSuccess = { url ->
                         profilePicUrl = url
                         isUploading = false
+                        // Auto-save to Firestore immediately
+                        if (currentUser != null) {
+                            firestore.collection("users").document(currentUser.uid)
+                                .update("profilePicUrl", url)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener { e ->
+                                    // If document doesn't exist yet, we might need to use set with merge
+                                    firestore.collection("users").document(currentUser.uid)
+                                        .set(mapOf("profilePicUrl" to url), SetOptions.merge())
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "Profile Photo Updated Successfully", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+                        }
                     },
                     onFailure = { e ->
                         isUploading = false

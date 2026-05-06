@@ -2,6 +2,7 @@ package com.example.mediconnect24x7
 //7382243069
 
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,13 +19,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import coil.compose.rememberAsyncImagePainter
 import com.example.mediconnect24x7.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
+import androidx.activity.compose.BackHandler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +57,71 @@ fun MainAppContent() {
     var userProfilePic by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
     var isRoleLoaded by remember { mutableStateOf(false) }
+
+    var showExitDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // System Back Press Handling
+    BackHandler(enabled = true) {
+        if (currentScreen != Screen.Home && currentScreen != Screen.Login) {
+            currentScreen = when (currentScreen) {
+                Screen.DoctorDetails -> Screen.RoleSelection
+                Screen.RoleSelection -> Screen.Login
+                Screen.CompleteProfile -> Screen.RoleSelection
+                else -> Screen.Home
+            }
+        } else {
+            showExitDialog = true
+        }
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White,
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.ExitToApp,
+                        contentDescription = null,
+                        tint = PremiumTeal,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        "Exit Application",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = PremiumTeal
+                    )
+                }
+            },
+            text = {
+                Text(
+                    "Are you sure you want to close MediConnect 24/7?",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.DarkGray
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { (context as? Activity)?.finish() },
+                    colors = ButtonDefaults.buttonColors(containerColor = PremiumTeal),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Exit", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExitDialog = false }
+                ) {
+                    Text("Cancel", color = Color.Gray, fontWeight = FontWeight.Medium)
+                }
+            }
+        )
+    }
 
     Scaffold(
         bottomBar = {
@@ -123,7 +194,13 @@ fun MainAppContent() {
                     }
                 )
                 Screen.DoctorDetails -> DoctorDetailsScreen(
-                    onComplete = { currentScreen = Screen.CompleteProfile },
+                    onComplete = { 
+                        if (userName.isBlank()) {
+                            currentScreen = Screen.CompleteProfile
+                        } else {
+                            currentScreen = Screen.Home
+                        }
+                    },
                     onBack = { currentScreen = Screen.RoleSelection }
                 )
                 Screen.CompleteProfile -> CompleteProfileScreen(
@@ -203,13 +280,17 @@ fun BottomNavigationBar(
     userName: String,
     onScreenSelected: (Screen) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp
     ) {
         NavigationBarItem(
             selected = currentScreen == Screen.Home,
-            onClick = { onScreenSelected(Screen.Home) },
+            onClick = { 
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onScreenSelected(Screen.Home) 
+            },
             icon = { Icon(if (currentScreen == Screen.Home) Icons.Default.Home else Icons.Outlined.Home, null) },
             label = { Text("Home", fontSize = 10.sp) },
             colors = NavigationBarItemDefaults.colors(
@@ -224,7 +305,10 @@ fun BottomNavigationBar(
         if (userRole.lowercase() == "admin") {
             NavigationBarItem(
                 selected = currentScreen == Screen.AdminUsers,
-                onClick = { onScreenSelected(Screen.AdminUsers) },
+                onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onScreenSelected(Screen.AdminUsers) 
+                },
                 icon = { Icon(if (currentScreen == Screen.AdminUsers) Icons.Default.People else Icons.Outlined.People, null) },
                 label = { Text("Users", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
@@ -239,7 +323,10 @@ fun BottomNavigationBar(
             if (userRole.lowercase() != "doctor") {
                 NavigationBarItem(
                     selected = currentScreen == Screen.Doctors,
-                    onClick = { onScreenSelected(Screen.Doctors) },
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onScreenSelected(Screen.Doctors) 
+                    },
                     icon = { Icon(if (currentScreen == Screen.Doctors) Icons.Default.MedicalServices else Icons.Outlined.MedicalServices, null) },
                     label = { Text("Doctors", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -253,7 +340,10 @@ fun BottomNavigationBar(
             } else {
                 NavigationBarItem(
                     selected = currentScreen == Screen.Appointments,
-                    onClick = { onScreenSelected(Screen.Appointments) },
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onScreenSelected(Screen.Appointments) 
+                    },
                     icon = { Icon(if (currentScreen == Screen.Appointments) Icons.Default.EventNote else Icons.Outlined.EventNote, null) },
                     label = { Text("Upcoming", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -267,7 +357,10 @@ fun BottomNavigationBar(
             }
             NavigationBarItem(
                 selected = currentScreen == Screen.Records,
-                onClick = { onScreenSelected(Screen.Records) },
+                onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onScreenSelected(Screen.Records) 
+                },
                 icon = { Icon(if (currentScreen == Screen.Records) Icons.Default.Folder else Icons.Outlined.Folder, null) },
                 label = { Text("Records", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
@@ -281,7 +374,10 @@ fun BottomNavigationBar(
             if (userRole.lowercase() != "doctor") {
                 NavigationBarItem(
                     selected = currentScreen == Screen.Medicines,
-                    onClick = { onScreenSelected(Screen.Medicines) },
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onScreenSelected(Screen.Medicines) 
+                    },
                     icon = { Icon(if (currentScreen == Screen.Medicines) Icons.Default.LocalPharmacy else Icons.Outlined.LocalPharmacy, null) },
                     label = { Text("Medicines", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -295,7 +391,10 @@ fun BottomNavigationBar(
             } else {
                 NavigationBarItem(
                     selected = currentScreen == Screen.Prescribe,
-                    onClick = { onScreenSelected(Screen.Prescribe) },
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onScreenSelected(Screen.Prescribe) 
+                    },
                     icon = { Icon(if (currentScreen == Screen.Prescribe) Icons.Default.NoteAdd else Icons.Outlined.NoteAdd, null) },
                     label = { Text("Prescribe", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -309,7 +408,10 @@ fun BottomNavigationBar(
             }
             NavigationBarItem(
                 selected = currentScreen == Screen.Symptoms,
-                onClick = { onScreenSelected(Screen.Symptoms) },
+                onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onScreenSelected(Screen.Symptoms) 
+                },
                 icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
                 label = { Text("Symptoms", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(

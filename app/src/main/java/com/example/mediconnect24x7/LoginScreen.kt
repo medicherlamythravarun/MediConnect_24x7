@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import androidx.activity.compose.BackHandler
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -49,6 +50,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
     var isLoading by remember { mutableStateOf(false) }
     var timerSeconds by remember { mutableStateOf(119) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Handle back press to go back from OTP input to Phone input
+    BackHandler(enabled = isOtpSent) {
+        isOtpSent = false
+        otpCode = ""
+        errorMessage = null
+    }
 
     LaunchedEffect(isOtpSent) {
         if (isOtpSent) {
