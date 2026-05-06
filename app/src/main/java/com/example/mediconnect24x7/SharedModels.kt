@@ -97,6 +97,7 @@ data class Appointment(
     val appointmentTime: String = "",
     val status: String = "Pending", // Pending, Confirmed, Cancelled, Completed
     val meetingId: String = "",
+    val callEndTime: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
 

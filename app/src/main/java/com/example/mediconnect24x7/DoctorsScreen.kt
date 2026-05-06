@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,11 @@ import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor, String, String) -> Unit = { _, _, _ -> }) {
+fun DoctorConsultationScreen(
+    clientName: String, 
+    onNavigateToVideoCall: (Doctor, String, String) -> Unit = { _, _, _ -> },
+    onJoinAppointment: (Appointment) -> Unit = {}
+) {
 
 
     val auth = FirebaseAuth.getInstance()
@@ -36,6 +41,7 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("All") }
+    var mainTab by remember { mutableStateOf(0) }
     val firestore = FirebaseFirestore.getInstance()
 
     val filteredDoctors = remember(doctors, searchQuery, selectedFilter) {
@@ -121,64 +127,83 @@ fun DoctorConsultationScreen(clientName: String, onNavigateToVideoCall: (Doctor,
             colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        TabRow(
+            selectedTabIndex = mainTab,
+            containerColor = Color.White,
+            contentColor = PremiumTeal,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.tabIndicatorOffset(tabPositions[mainTab]),
+                    color = PremiumTeal
+                )
+            }
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Search Engine Bar
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            Tab(selected = mainTab == 0, onClick = { mainTab = 0 }, text = { Text("Find Doctors") })
+            Tab(selected = mainTab == 1, onClick = { mainTab = 1 }, text = { Text("My Consultations") })
+        }
+
+        if (mainTab == 0) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp)),
-                placeholder = { Text("Search by name or specialty...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PremiumTeal) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear search", tint = Color.Gray)
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PremiumTeal,
-                    unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                ),
-                singleLine = true
-            )
-
-            FilterChipBar(
-                selectedFilter = selectedFilter,
-                onFilterSelected = { selectedFilter = it }
-            )
-
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PremiumTeal)
-                }
-            } else if (filteredDoctors.isEmpty()) {
-                EmptyDoctorsView()
-            } else {
-                Column(
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Search Engine Bar
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    filteredDoctors.forEach { doctor ->
-                        DoctorCard(doctor, clientName, onNavigateToVideoCall)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp)),
+                    placeholder = { Text("Search by name or specialty...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PremiumTeal) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear search", tint = Color.Gray)
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PremiumTeal,
+                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    ),
+                    singleLine = true
+                )
+
+                FilterChipBar(
+                    selectedFilter = selectedFilter,
+                    onFilterSelected = { selectedFilter = it }
+                )
+
+                if (isLoading) {
+                    Box(modifier = Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PremiumTeal)
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                } else if (filteredDoctors.isEmpty()) {
+                    EmptyDoctorsView()
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        filteredDoctors.forEach { doctor ->
+                            DoctorCard(doctor, clientName, onNavigateToVideoCall)
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
+        } else {
+            AppointmentsScreen(showTopBar = false, onJoinCall = onJoinAppointment)
         }
     }
 }

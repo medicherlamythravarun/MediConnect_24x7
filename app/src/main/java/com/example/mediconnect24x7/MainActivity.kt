@@ -237,6 +237,13 @@ fun MainAppContent() {
                         selectedCallID = callID
                         selectedAppointmentId = appointmentId
                         currentScreen = Screen.VideoCall 
+                    },
+                    onJoinAppointment = { appointment ->
+                        selectedCallID = appointment.meetingId
+                        selectedAppointmentId = appointment.appointmentId
+                        selectedClientName = appointment.clientName
+                        selectedDoctor = null
+                        currentScreen = Screen.VideoCall
                     }
                 )
                 Screen.VideoCall -> VideoCallScreen(

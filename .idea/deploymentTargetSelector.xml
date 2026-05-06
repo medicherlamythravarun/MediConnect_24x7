@@ -15,12 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\MADHUSHALNE\.android\avd\Resizable_Experimental.avd" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCXB2B77YF" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCXB2B77YF" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\MADHUSHALNE\.android\avd\Resizable_Experimental.avd" />
               </handle>
             </Target>
           </targets>

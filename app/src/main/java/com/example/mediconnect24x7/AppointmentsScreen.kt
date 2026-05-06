@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,13 +27,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentsScreen(onJoinCall: (Appointment) -> Unit = {}) {
+fun AppointmentsScreen(showTopBar: Boolean = true, onJoinCall: (Appointment) -> Unit = {}) {
 
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     
-    var appointments by remember { mutableStateOf<List<Appointment>>(emptyList()) }
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    var upcomingAppointments by remember { mutableStateOf<List<Appointment>>(emptyList()) }
+    var historyAppointments by remember { mutableStateOf<List<Appointment>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
     DisposableEffect(currentUser?.uid) {
@@ -46,9 +49,9 @@ fun AppointmentsScreen(onJoinCall: (Appointment) -> Unit = {}) {
                         return@addSnapshotListener
                     }
                     if (querySnapshot != null) {
-                        val allAppointments = querySnapshot.toObjects(Appointment::class.java)
-                        // Show only the latest one
-                        appointments = allAppointments.sortedByDescending { it.timestamp }.take(1)
+                        val allAppointments = querySnapshot.toObjects(Appointment::class.java).sortedByDescending { it.timestamp }
+                        upcomingAppointments = allAppointments.filter { it.status != "Completed" && it.status != "Cancelled" }
+                        historyAppointments = allAppointments.filter { it.status == "Completed" || it.status == "Cancelled" }
                     }
                     isLoading = false
                 }
@@ -66,26 +69,53 @@ fun AppointmentsScreen(onJoinCall: (Appointment) -> Unit = {}) {
             .fillMaxSize()
             .background(Color(0xFFF4F7F6))
     ) {
-        TopAppBar(
-            title = { Text("My Appointments", fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White,
-                titleContentColor = PremiumTeal
+        if (showTopBar) {
+            TopAppBar(
+                title = { Text("My Appointments", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = PremiumTeal
+                )
             )
-        )
+        }
+
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            containerColor = Color.White,
+            contentColor = PremiumTeal,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = PremiumTeal
+                )
+            }
+        ) {
+            Tab(
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 },
+                text = { Text("Upcoming") }
+            )
+            Tab(
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 },
+                text = { Text("History") }
+            )
+        }
+
+        val currentList = if (selectedTabIndex == 0) upcomingAppointments else historyAppointments
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = PremiumTeal)
             }
-        } else if (appointments.isEmpty()) {
-            EmptyAppointmentsView()
+        } else if (currentList.isEmpty()) {
+            EmptyAppointmentsView(selectedTabIndex == 1)
         } else {
             LazyColumn(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(appointments) { appointment ->
+                items(currentList) { appointment ->
                     AppointmentCard(appointment, onJoinCall)
                 }
             }
@@ -133,7 +163,7 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(appointment.appointmentTime, fontSize = 14.sp, color = Color.DarkGray)
+                    Text(if (appointment.status == "Completed" && appointment.callEndTime.isNotEmpty()) "Ended: ${appointment.callEndTime}" else appointment.appointmentTime, fontSize = 14.sp, color = Color.DarkGray)
                 }
             }
 
@@ -155,7 +185,7 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
 }
 
 @Composable
-fun EmptyAppointmentsView() {
+fun EmptyAppointmentsView(isHistory: Boolean) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,13 +199,13 @@ fun EmptyAppointmentsView() {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            "No Appointments Yet",
+            if (isHistory) "No Consultation History" else "No Appointments Yet",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.DarkGray
         )
         Text(
-            "You don't have any scheduled appointments at the moment. New requests will appear here.",
+            if (isHistory) "Your past consultations will appear here." else "You don't have any scheduled appointments at the moment. New requests will appear here.",
             fontSize = 14.sp,
             color = Color.Gray,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,

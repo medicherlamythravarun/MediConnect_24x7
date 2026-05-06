@@ -159,8 +159,14 @@ fun VideoCallScreen(
             TextButton(
                 onClick = {
                     if (appointmentId.isNotEmpty()) {
+                        val endTime = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
                         firestore.collection("appointments").document(appointmentId)
-                            .update("status", "Completed")
+                            .update(
+                                mapOf(
+                                    "status" to "Completed",
+                                    "callEndTime" to endTime
+                                )
+                            )
                             .addOnCompleteListener {
                                 onEndCall()
                             }
