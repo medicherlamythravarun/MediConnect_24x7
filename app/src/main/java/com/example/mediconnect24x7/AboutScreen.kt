@@ -2,9 +2,11 @@ package com.example.mediconnect24x7
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Troubleshoot
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,7 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,20 +45,21 @@ fun AboutScreen(onBack: () -> Unit) {
         isVisible = true
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("About App", color = PremiumTeal, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PremiumTeal)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
-        containerColor = Color(0xFFF4F7F6)
-    ) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F7F6))
+    ) {
+        TopAppBar(
+            title = { Text("About App", color = PremiumTeal, fontWeight = FontWeight.Bold) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PremiumTeal)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+        )
+
         AnimatedVisibility(
             visible = isVisible,
             enter = fadeIn(tween(800)) + slideInVertically(
@@ -63,9 +70,8 @@ fun AboutScreen(onBack: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header Card
@@ -109,7 +115,9 @@ fun AboutScreen(onBack: () -> Unit) {
                     icon = Icons.Default.Info
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                DevelopersSection()
+
+                Spacer(modifier = Modifier.height(10.dp))
                 
                 Text(
                     text = "HealthTech",
@@ -119,7 +127,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     letterSpacing = 1.sp
                 )
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -222,3 +230,117 @@ fun SectionCard(title: String, content: String, icon: ImageVector, isTitle: Bool
         }
     }
 }
+
+@Composable
+fun DevelopersSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(PremiumMint.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.People, contentDescription = null, tint = PremiumTeal, modifier = Modifier.size(24.dp))
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    "Our Developers",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = PremiumTeal
+                )
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // To use actual images, pass the resource ID like: imageRes = R.drawable.dev1_photo
+                DeveloperProfile(name = "Varun", delayMillis = 0, imageRes = R.drawable.developer_prathi)
+                DeveloperProfile(name = "Prathish", delayMillis = 300, imageRes = R.drawable.developer_prathi)
+                DeveloperProfile(name = "Manoj", delayMillis = 600, imageRes = R.drawable.developer_prathi)
+            }
+        }
+    }
+}
+
+@Composable
+fun DeveloperProfile(name: String, delayMillis: Int, imageRes: Int? = null) {
+    val infiniteTransition = rememberInfiniteTransition(label = "anim_$name")
+    
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearOutSlowInEasing, delayMillis = delayMillis),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale_$name"
+    )
+    
+
+
+    val offsetY by infiniteTransition.animateFloat(
+        initialValue = -4f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = LinearEasing, delayMillis = delayMillis),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset_$name"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(90.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .offset(y = offsetY.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+
+                }
+                .size(70.dp)
+                .clip(CircleShape)
+                .background(PremiumMint.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (imageRes != null) {
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = "Photo of $name",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Photo of $name",
+                    tint = PremiumTeal,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = name,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF4B5563)
+        )
+    }
+}
+

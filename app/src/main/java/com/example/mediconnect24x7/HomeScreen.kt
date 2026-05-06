@@ -471,40 +471,65 @@ fun ServiceCard(item: ServiceItem, modifier: Modifier = Modifier) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color.White,
+                            item.bgColor
+                        )
+                    )
+                )
         ) {
-            Box(
+            Icon(
+                imageVector = item.icon,
+                contentDescription = null,
+                tint = item.iconColor.copy(alpha = 0.04f),
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(item.bgColor),
-                contentAlignment = Alignment.Center
+                    .size(130.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 20.dp, y = 20.dp)
+                    .graphicsLayer {
+                        rotationZ = -15f
+                    }
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = null,
-                    tint = item.iconColor,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            Column {
-                Text(
-                    text = item.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = Color(0xFF1F2937)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = item.subtitle,
-                    fontSize = 13.sp,
-                    color = Color(0xFF6B7280),
-                    fontWeight = FontWeight.Medium
-                )
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(item.bgColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = null,
+                        tint = item.iconColor,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Column {
+                    Text(
+                        text = item.title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = Color(0xFF1F2937)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = item.subtitle,
+                        fontSize = 13.sp,
+                        color = Color(0xFF6B7280),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
