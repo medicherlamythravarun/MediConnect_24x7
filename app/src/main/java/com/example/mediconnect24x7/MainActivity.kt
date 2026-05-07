@@ -61,7 +61,7 @@ fun MainAppContent() {
     var showExitDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // System Back Press Handling
+    //  Back Press
     BackHandler(enabled = true) {
         if (currentScreen != Screen.Home && currentScreen != Screen.Login) {
             currentScreen = when (currentScreen) {

@@ -44,13 +44,9 @@ fun RecordsScreen() {
     val storage = FirebaseStorage.getInstance()
     val currentUser = auth.currentUser
     
-    var symptomRecords by remember { mutableStateOf<List<SymptomRecord>>(emptyList()) }
     var reportRecords by remember { mutableStateOf<List<ReportRecord>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var isUploading by remember { mutableStateOf(false) }
-    
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("AI Consultations", "Uploaded Reports")
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -86,7 +82,6 @@ fun RecordsScreen() {
                             .addOnSuccessListener {
                                 isUploading = false
                                 Toast.makeText(context, "Report uploaded successfully!", Toast.LENGTH_SHORT).show()
-                                selectedTabIndex = 1
                             }
                             .addOnFailureListener {
                                 isUploading = false
@@ -105,24 +100,13 @@ fun RecordsScreen() {
         if (currentUser != null) {
             firestore.collection("users")
                 .document(currentUser.uid)
-                .collection("health_records")
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .addSnapshotListener { snapshot, e ->
-                    if (e == null && snapshot != null) {
-                        symptomRecords = snapshot.documents.mapNotNull { it.toObject(SymptomRecord::class.java) }
-                    }
-                    if (selectedTabIndex == 0) isLoading = false
-                }
-                
-            firestore.collection("users")
-                .document(currentUser.uid)
                 .collection("uploaded_reports")
                 .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, e ->
                     if (e == null && snapshot != null) {
                         reportRecords = snapshot.documents.mapNotNull { it.toObject(ReportRecord::class.java) }
                     }
-                    if (selectedTabIndex == 1) isLoading = false
+                    isLoading = false
                 }
         } else {
             isLoading = false
@@ -161,32 +145,6 @@ fun RecordsScreen() {
                 .padding(paddingValues)
                 .background(Color(0xFFF4F7F6))
         ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = Color.White,
-                contentColor = PremiumTeal,
-                indicator = { tabPositions ->
-                    TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = PremiumTeal
-                    )
-                }
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { 
-                            Text(
-                                title, 
-                                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTabIndex == index) PremiumTeal else Color.Gray
-                            ) 
-                        }
-                    )
-                }
-            }
-
             if (isUploading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = PremiumTeal)
             }
@@ -215,11 +173,11 @@ fun RecordsScreen() {
                             Text("Synced with Cloud", fontSize = 12.sp, color = Color(0xFF1976D2), fontWeight = FontWeight.Medium)
                         }
                     }
-                    val count = if (selectedTabIndex == 0) symptomRecords.size else reportRecords.size
+                    val count = reportRecords.size
                     Text("$count records", color = Color.Gray, fontSize = 13.sp)
                 }
 
-                val currentListEmpty = (selectedTabIndex == 0 && symptomRecords.isEmpty()) || (selectedTabIndex == 1 && reportRecords.isEmpty())
+                val currentListEmpty = reportRecords.isEmpty()
 
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -228,14 +186,14 @@ fun RecordsScreen() {
                 } else if (currentListEmpty) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                if (selectedTabIndex == 0) Icons.Default.History else Icons.Default.Description, 
-                                null, 
-                                modifier = Modifier.size(64.dp), 
-                                tint = Color.LightGray
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("No ${if (selectedTabIndex == 0) "consultations" else "reports"} found", color = Color.Gray)
+                                Icon(
+                                    Icons.Default.Description, 
+                                    null, 
+                                    modifier = Modifier.size(64.dp), 
+                                    tint = Color.LightGray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text("No reports found", color = Color.Gray)
                         }
                     }
                 } else {
@@ -243,19 +201,6 @@ fun RecordsScreen() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        if (selectedTabIndex == 0) {
-                            items(symptomRecords) { record ->
-                                SymptomRecordCard(record, onDelete = {
-                                    if (currentUser != null) {
-                                        firestore.collection("users").document(currentUser.uid)
-                                            .collection("health_records").document(record.id).delete()
-                                            .addOnSuccessListener {
-                                                Toast.makeText(context, "Consultation deleted", Toast.LENGTH_SHORT).show()
-                                            }
-                                    }
-                                })
-                            }
-                        } else {
                             items(reportRecords) { record ->
                                 ReportRecordCard(record, onDelete = {
                                     if (currentUser != null) {
@@ -268,7 +213,6 @@ fun RecordsScreen() {
                                     }
                                 })
                             }
-                        }
                         item {
                             Spacer(modifier = Modifier.height(80.dp))
                         }
