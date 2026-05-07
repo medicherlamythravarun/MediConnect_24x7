@@ -62,37 +62,51 @@ fun RecordsScreen() {
                 }
             }
 
-            val storageRef = storage.reference.child("reports/${currentUser.uid}/${UUID.randomUUID()}_$fileName")
-            storageRef.putFile(uri)
-                .addOnSuccessListener {
-                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        val reportRecord = ReportRecord(
-                            id = UUID.randomUUID().toString(),
-                            userId = currentUser.uid,
-                            fileName = fileName,
-                            fileUrl = downloadUrl.toString(),
-                            timestamp = System.currentTimeMillis()
-                        )
-                        
-                        firestore.collection("users")
-                            .document(currentUser.uid)
-                            .collection("uploaded_reports")
-                            .document(reportRecord.id)
-                            .set(reportRecord)
-                            .addOnSuccessListener {
-                                isUploading = false
-                                Toast.makeText(context, "Report uploaded successfully!", Toast.LENGTH_SHORT).show()
-                            }
-                            .addOnFailureListener {
-                                isUploading = false
-                                Toast.makeText(context, "Failed to save record.", Toast.LENGTH_SHORT).show()
-                            }
+            val mimeType = context.contentResolver.getType(uri) ?: "application/pdf"
+
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+                if (bytes != null) {
+                    if (bytes.size > 1000000) {
+                        isUploading = false
+                        Toast.makeText(context, "File is too large (max 1MB). Please choose a smaller file.", Toast.LENGTH_LONG).show()
+                        return@rememberLauncherForActivityResult
                     }
-                }
-                .addOnFailureListener {
+
+                    val base64String = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                    val base64DataUri = "data:$mimeType;base64,$base64String"
+
+                    val reportRecord = ReportRecord(
+                        id = UUID.randomUUID().toString(),
+                        userId = currentUser.uid,
+                        fileName = fileName,
+                        fileUrl = base64DataUri,
+                        timestamp = System.currentTimeMillis()
+                    )
+                    
+                    firestore.collection("users")
+                        .document(currentUser.uid)
+                        .collection("uploaded_reports")
+                        .document(reportRecord.id)
+                        .set(reportRecord)
+                        .addOnSuccessListener {
+                            isUploading = false
+                            Toast.makeText(context, "Report uploaded successfully!", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener {
+                            isUploading = false
+                            Toast.makeText(context, "Failed to save record.", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
                     isUploading = false
-                    Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Could not read file.", Toast.LENGTH_SHORT).show()
                 }
+            } catch (e: Exception) {
+                isUploading = false
+                Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -430,8 +444,37 @@ fun ReportRecordCard(record: ReportRecord, onDelete: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(record.fileUrl))
-                context.startActivity(intent)
+                if (record.fileUrl.startsWith("data:")) {
+                    try {
+                        val commaIndex = record.fileUrl.indexOf(',')
+                        if (commaIndex != -1) {
+                            val base64Data = record.fileUrl.substring(commaIndex + 1)
+                            val decodedBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                            val tempFile = java.io.File(context.cacheDir, record.fileName)
+                            java.io.FileOutputStream(tempFile).use { it.write(decodedBytes) }
+                            val uri = androidx.core.content.FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                tempFile
+                            )
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                val mimeType = if (isPdf) "application/pdf" else "image/*"
+                                setDataAndType(uri, mimeType)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Could not open file", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(record.fileUrl))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Could not open URL", Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),

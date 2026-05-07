@@ -71,7 +71,7 @@ fun AppointmentsScreen(showTopBar: Boolean = true, onJoinCall: (Appointment) -> 
     ) {
         if (showTopBar) {
             TopAppBar(
-                title = { Text("My Appointments", fontWeight = FontWeight.Bold) },
+                title = { Text("My Appointments", fontWeight = FontWeight.ExtraBold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White,
                     titleContentColor = PremiumTeal
