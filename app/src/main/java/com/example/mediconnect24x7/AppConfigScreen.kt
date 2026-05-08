@@ -1,20 +1,56 @@
 package com.example.mediconnect24x7
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +59,7 @@ import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -35,6 +72,10 @@ fun AppConfigScreen() {
     var collections by remember { mutableStateOf<List<String>>(emptyList()) }
     var isFetchingCollections by remember { mutableStateOf(true) }
     var refreshKey by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var collectionToDelete by remember { mutableStateOf<String?>(null) }
+    var isDeleting by remember { mutableStateOf(false) }
 
     LaunchedEffect(refreshKey) {
         isFetchingCollections = true
@@ -106,6 +147,66 @@ fun AppConfigScreen() {
             )
         )
 
+        if (isDeleting) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.Red,
+                trackColor = Color.Red.copy(alpha = 0.1f)
+            )
+        }
+
+        if (collectionToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { collectionToDelete = null },
+                icon = { Icon(Icons.Outlined.Warning, contentDescription = null, tint = Color.Red) },
+                title = { Text("Delete Collection?") },
+                text = {
+                    Text("This will permanently delete all documents in the '$collectionToDelete' collection. This action is IRREVERSIBLE.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val colName = collectionToDelete!!
+                            collectionToDelete = null
+                            scope.launch {
+                                isDeleting = true
+                                try {
+                                    val firestore = FirebaseFirestore.getInstance()
+                                    val snapshot = firestore.collection(colName).get().await()
+                                    val batch = firestore.batch()
+                                    snapshot.documents.forEach { doc ->
+                                        batch.delete(doc.reference)
+                                    }
+                                    batch.commit().await()
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, "Collection '$colName' deleted successfully", Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                } finally {
+                                    isDeleting = false
+                                    refreshKey++
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Delete All Data")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { collectionToDelete = null }) {
+                        Text("Cancel")
+                    }
+                },
+                containerColor = Color.White,
+                titleContentColor = Color.Black,
+                textContentColor = Color.Gray
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(20.dp),
@@ -139,7 +240,10 @@ fun AppConfigScreen() {
                 }
             } else {
                 items(collections) { collectionName ->
-                    CollectionCard(collectionName)
+                    CollectionCard(
+                        name = collectionName,
+                        onDeleteClick = { collectionToDelete = collectionName }
+                    )
                 }
             }
             
@@ -158,7 +262,7 @@ fun AppConfigScreen() {
 }
 
 @Composable
-fun CollectionCard(name: String) {
+fun CollectionCard(name: String, onDeleteClick: () -> Unit) {
     var count by remember { mutableIntStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     val firestore = FirebaseFirestore.getInstance()
@@ -224,17 +328,33 @@ fun CollectionCard(name: String) {
                     color = PremiumTeal
                 )
             } else {
-                Surface(
-                    color = if (count == -1) Color.Red.copy(alpha = 0.1f) else PremiumTeal.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = if (count == -1) "Error" else "$count Docs",
-                        color = if (count == -1) Color.Red else PremiumTeal,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = if (count == -1) Color.Red.copy(alpha = 0.1f) else PremiumTeal.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = if (count == -1) "Error" else "$count Docs",
+                            color = if (count == -1) Color.Red else PremiumTeal,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.Delete,
+                            contentDescription = "Delete Collection",
+                            tint = Color.Red.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

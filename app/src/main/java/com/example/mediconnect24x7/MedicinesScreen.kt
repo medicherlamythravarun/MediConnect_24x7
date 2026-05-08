@@ -134,7 +134,6 @@ fun MedicinesScreen() {
                         items(prescriptions) { prescription ->
                             PrescriptionCard(prescription)
                         }
-                        item { Spacer(modifier = Modifier.height(80.dp)) }
                     }
                 }
             } else {
@@ -283,7 +282,6 @@ fun StoreAvailabilityTab() {
                     }
                 })
             }
-            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
 }

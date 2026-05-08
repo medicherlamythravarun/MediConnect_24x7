@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,6 +96,19 @@ fun MainAppContent() {
 
     var showExitDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    var currentUser by remember { mutableStateOf(auth.currentUser) }
+
+    // Observe Auth State Changes
+    DisposableEffect(auth) {
+        val listener = FirebaseAuth.AuthStateListener { 
+            currentUser = it.currentUser
+        }
+        auth.addAuthStateListener(listener)
+        onDispose {
+            auth.removeAuthStateListener(listener)
+        }
+    }
 
     //  Back Press
     BackHandler(enabled = true) {
@@ -175,8 +189,8 @@ fun MainAppContent() {
         val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
         // Role Check logic
-        LaunchedEffect(auth.currentUser) {
-            val user = auth.currentUser
+        LaunchedEffect(currentUser) {
+            val user = currentUser
             if (user != null) {
                 firestore.collection("users").document(user.uid).get()
                     .addOnSuccessListener { document ->
@@ -186,7 +200,7 @@ fun MainAppContent() {
                             userProfilePic = document.getString("profilePicUrl") ?: ""
                             userName = document.getString("name") ?: ""
                             
-                            if (currentScreen == Screen.Splash) {
+                            if (currentScreen == Screen.Splash || currentScreen == Screen.Login) {
                                 if (role.isEmpty()) {
                                     currentScreen = Screen.RoleSelection
                                 } else {
@@ -213,7 +227,7 @@ fun MainAppContent() {
                             // User document doesn't exist yet, must select role
                             userRole = ""
                             isRoleLoaded = true
-                            if (currentScreen == Screen.Splash) {
+                            if (currentScreen == Screen.Splash || currentScreen == Screen.Login) {
                                 currentScreen = Screen.RoleSelection
                             }
                         }
@@ -236,7 +250,8 @@ fun MainAppContent() {
                 Screen.Splash -> SplashScreen()
                 Screen.Login -> LoginScreen(
                     onLoginSuccess = {
-                        currentScreen = Screen.Home
+                        // Navigation is handled by the LaunchedEffect(auth.currentUser)
+                        // which reacts to the auth state change.
                     }
                 )
                 Screen.RoleSelection -> RoleSelectionScreen(

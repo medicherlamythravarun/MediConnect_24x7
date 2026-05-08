@@ -213,19 +213,16 @@ fun RecordsScreen() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                            items(reportRecords) { record ->
-                                ReportRecordCard(record, onDelete = {
-                                    if (currentUser != null) {
-                                        firestore.collection("users").document(currentUser.uid)
-                                            .collection("uploaded_reports").document(record.id).delete()
-                                            .addOnSuccessListener {
-                                                Toast.makeText(context, "Report deleted", Toast.LENGTH_SHORT).show()
-                                            }
-                                    }
-                                })
-                            }
-                        item {
-                            Spacer(modifier = Modifier.height(80.dp))
+                        items(reportRecords) { record ->
+                            ReportRecordCard(record, onDelete = {
+                                if (currentUser != null) {
+                                    firestore.collection("users").document(currentUser.uid)
+                                        .collection("uploaded_reports").document(record.id).delete()
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "Report deleted", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+                            })
                         }
                     }
                 }
@@ -233,6 +230,7 @@ fun RecordsScreen() {
         }
     }
 }
+
 
 @Composable
 fun ReportRecordCard(record: ReportRecord, onDelete: () -> Unit) {
