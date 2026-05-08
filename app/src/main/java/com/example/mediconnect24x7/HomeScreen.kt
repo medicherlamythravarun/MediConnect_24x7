@@ -190,7 +190,7 @@ fun MediConnectHomeScreen(
             visible = isVisible,
             enter = fadeIn(animationSpec = tween(600)) + slideInVertically(
                 initialOffsetY = { 50 },
-                animationSpec = tween(600)
+                animationSpec = tween(400)
             )
         ) {
             Column(
@@ -200,11 +200,11 @@ fun MediConnectHomeScreen(
                 HeroCard(onClick = onNavigateToAbout)
                 HealthTipBanner()
                 Text(
-                    text = "How can we help today?",
+                    text = "MediConnect services at your fingertips",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1F2937),
-                    fontSize = 22.sp
+                    fontSize = 20.sp
                 )
                 ServiceGrid(
                     userRole = userRole,
@@ -229,9 +229,13 @@ fun HeroCard(onClick: () -> Unit = {}) {
         initialValue = 1f,
         targetValue = 1.02f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = tween(
+                durationMillis = 900,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse,
         ),
+
         label = "hero_scale"
     )
 
@@ -256,6 +260,7 @@ fun HeroCard(onClick: () -> Unit = {}) {
             Column {
                 Text(
                     "Hello there \uD83D\uDC4B",
+
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -540,10 +545,10 @@ fun EmergencyCard() {
     val context = LocalContext.current
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
+        initialValue = 0.9f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
+            animation = tween(400, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulse_alpha"

@@ -98,6 +98,7 @@ fun MainAppContent() {
                 Screen.DoctorDetails -> Screen.RoleSelection
                 Screen.RoleSelection -> Screen.Login
                 Screen.CompleteProfile -> Screen.RoleSelection
+                Screen.Settings -> Screen.Profile
                 else -> Screen.Home
             }
         } else {
@@ -298,7 +299,13 @@ fun MainAppContent() {
                     onSignOut = {
                         auth.signOut()
                         currentScreen = Screen.Login
+                    },
+                    onNavigateToSettings = {
+                        currentScreen = Screen.Settings
                     }
+                )
+                Screen.Settings -> SettingsScreen(
+                    onBack = { currentScreen = Screen.Profile }
                 )
                 Screen.About -> AboutScreen(
                     onBack = { currentScreen = Screen.Home }

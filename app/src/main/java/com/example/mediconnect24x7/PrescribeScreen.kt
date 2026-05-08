@@ -102,7 +102,7 @@ fun PrescribeScreen() {
                 contentColor = PremiumTeal
             ) {
                 Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                    Text("Pending", modifier = Modifier.padding(16.dp), fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal, color = if (selectedTab == 0) PremiumTeal else Color.Gray)
+                    Text("Patients", modifier = Modifier.padding(16.dp), fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal, color = if (selectedTab == 0) PremiumTeal else Color.Gray)
                 }
                 Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
                     Text("History", modifier = Modifier.padding(16.dp), fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal, color = if (selectedTab == 1) PremiumTeal else Color.Gray)

@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onSignOut: () -> Unit) {
+fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
@@ -203,6 +203,21 @@ fun ProfileScreen(onSignOut: () -> Unit) {
                     .padding(top = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White
+                        )
+                    }
+                }
                 Box(contentAlignment = Alignment.BottomEnd) {
                     Box(
                         modifier = Modifier
