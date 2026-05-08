@@ -26,13 +26,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.core.HealthRecord
 import com.example.mediconnect24x7.core.ReportRecord
-import com.example.mediconnect24x7.core.SymptomRecord
 import com.example.mediconnect24x7.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,7 +40,6 @@ fun RecordsScreen() {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
-    val storage = FirebaseStorage.getInstance()
     val currentUser = auth.currentUser
     
     var reportRecords by remember { mutableStateOf<List<ReportRecord>>(emptyList()) }
@@ -223,7 +219,6 @@ fun RecordsScreen() {
                                         firestore.collection("users").document(currentUser.uid)
                                             .collection("uploaded_reports").document(record.id).delete()
                                             .addOnSuccessListener {
-                                                try { storage.getReferenceFromUrl(record.fileUrl).delete() } catch (e: Exception) {}
                                                 Toast.makeText(context, "Report deleted", Toast.LENGTH_SHORT).show()
                                             }
                                     }
@@ -233,202 +228,6 @@ fun RecordsScreen() {
                             Spacer(modifier = Modifier.height(80.dp))
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SymptomRecordCard(record: SymptomRecord, onDelete: () -> Unit) {
-    val sdf = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
-    val dateString = sdf.format(Date(record.timestamp))
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(PremiumMint.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.MedicalInformation, null, tint = PremiumTeal, modifier = Modifier.size(20.dp))
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text("AI Consultation", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
-                        Text(dateString, color = Color.Gray, fontSize = 12.sp)
-                    }
-                }
-                Box {
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(Icons.Default.MoreVert, null, tint = Color.Gray)
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Delete", color = Color.Red) },
-                            onClick = {
-                                expanded = false
-                                onDelete()
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                "Symptoms reported:",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                color = PremiumTeal
-            )
-            Text(
-                record.symptoms,
-                fontSize = 14.sp,
-                color = Color.DarkGray,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFF1F8E9)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AutoAwesome, null, tint = PremiumTeal, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "AI Suggestion",
-                            fontSize = 12.sp,
-                            color = PremiumTeal,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        record.aiRecommendation,
-                        fontSize = 13.sp,
-                        color = Color.Black,
-                        lineHeight = 20.sp
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RecordCard(record: HealthRecord) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.3f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(PremiumMint.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Person, null, tint = PremiumTeal)
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(record.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
-                        Text("Age: ${record.age} · ${record.visits} visits", color = Color.Gray, fontSize = 13.sp)
-                    }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = EmergencyRed
-                    ) {
-                        Text(
-                            text = record.bloodGroup,
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Icon(Icons.Default.ChevronRight, null, tint = Color.Gray)
-                }
-            }
-
-            if (record.allergies != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Warning,
-                        null,
-                        tint = Color(0xFFF57C00),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        "Allergic to: ${record.allergies}",
-                        color = Color(0xFFF57C00),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFE8F5E9)
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.CalendarToday, null, tint = PremiumTeal, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Last visit: ${record.lastVisitDate} · ${record.lastVisitReason}",
-                        fontSize = 12.sp,
-                        color = PremiumTeal,
-                        fontWeight = FontWeight.Medium
-                    )
                 }
             }
         }

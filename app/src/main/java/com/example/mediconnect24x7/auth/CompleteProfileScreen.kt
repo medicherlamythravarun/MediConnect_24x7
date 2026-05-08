@@ -1,5 +1,5 @@
 package com.example.mediconnect24x7.auth
-//73822 43069
+
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,8 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.AgePickerDialog
-import com.example.mediconnect24x7.ProfileField
+import com.example.mediconnect24x7.profile.AgePickerDialog
+import com.example.mediconnect24x7.profile.ProfileField
 import com.example.mediconnect24x7.core.UserProfile
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.example.mediconnect24x7.ui.theme.PremiumMint

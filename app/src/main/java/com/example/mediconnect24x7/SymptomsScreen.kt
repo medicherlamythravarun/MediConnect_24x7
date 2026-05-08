@@ -333,7 +333,7 @@ fun ChatBubble(text: String, isUser: Boolean, timestamp: Long) {
 private suspend fun analyzeSymptomsWithGemini(input: String): String {
     return try {
         val generativeModel = GenerativeModel(
-            modelName = "gemini-2.5-flash",
+            modelName = "gemini-1.5-flash",
             apiKey = "AIzaSyBmS18T6e9PDuSquTOjoWs7yAttmITscvg"
         )
         val prompt = """

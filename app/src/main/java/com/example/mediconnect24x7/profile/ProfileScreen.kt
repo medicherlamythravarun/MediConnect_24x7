@@ -1,6 +1,12 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.profile
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
+import android.util.Base64
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -66,9 +72,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -79,8 +87,10 @@ import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +98,6 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
-    val storage = FirebaseStorage.getInstance()
     val currentUser = auth.currentUser
 
     var name by remember { mutableStateOf("") }
@@ -116,9 +125,9 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
         onResult = { uri ->
             if (uri != null) {
                 isUploading = true
-                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     val base64Image = compressAndEncodeImage(context, uri)
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    withContext(Dispatchers.Main) {
                         if (base64Image != null) {
                             profilePicUrl = base64Image
                             isUploading = false
@@ -278,7 +287,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                             val model = if (profilePicUrl.startsWith("data:image")) {
                                 try {
                                     val base64String = profilePicUrl.substringAfter("base64,")
-                                    android.util.Base64.decode(base64String, android.util.Base64.DEFAULT)
+                                    Base64.decode(base64String, Base64.DEFAULT)
                                 } catch(e: Exception) {
                                     profilePicUrl
                                 }
@@ -620,7 +629,7 @@ fun AgePickerDialog(
                                 .clickable { onAgeSelected(i.toString()) }
                                 .padding(vertical = 14.dp),
                             fontSize = 18.sp,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            textAlign = TextAlign.Center,
                             color = if (currentAge == i.toString()) PremiumTeal else Color.Black,
                             fontWeight = if (currentAge == i.toString()) FontWeight.ExtraBold else FontWeight.Normal
                         )
@@ -634,26 +643,26 @@ fun AgePickerDialog(
     )
 }
 
-private fun compressAndEncodeImage(context: android.content.Context, uri: Uri): String? {
+private fun compressAndEncodeImage(context: Context, uri: Uri): String? {
     return try {
         // Check for rotation in EXIF data
         var rotationDegrees = 0f
         context.contentResolver.openInputStream(uri)?.use { stream ->
-            val exif = android.media.ExifInterface(stream)
+            val exif = ExifInterface(stream)
             val orientation = exif.getAttributeInt(
-                android.media.ExifInterface.TAG_ORIENTATION,
-                android.media.ExifInterface.ORIENTATION_NORMAL
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
             )
             rotationDegrees = when (orientation) {
-                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270f
                 else -> 0f
             }
         }
 
         val inputStream = context.contentResolver.openInputStream(uri)
-        val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
         inputStream?.close()
         
         if (originalBitmap == null) return null
@@ -663,19 +672,19 @@ private fun compressAndEncodeImage(context: android.content.Context, uri: Uri): 
         val scale = Math.min(maxWidth.toFloat() / originalBitmap.width, maxHeight.toFloat() / originalBitmap.height)
         
         val scaledBitmap = if (scale < 1f || rotationDegrees != 0f) {
-            val matrix = android.graphics.Matrix()
+            val matrix = Matrix()
             if (scale < 1f) matrix.postScale(scale, scale)
             if (rotationDegrees != 0f) matrix.postRotate(rotationDegrees)
-            android.graphics.Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
+            Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
         } else {
             originalBitmap
         }
         
-        val outputStream = java.io.ByteArrayOutputStream()
-        scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 70, outputStream)
+        val outputStream = ByteArrayOutputStream()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
         val byteArray = outputStream.toByteArray()
         
-        "data:image/jpeg;base64," + android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
+        "data:image/jpeg;base64," + Base64.encodeToString(byteArray, Base64.NO_WRAP)
     } catch (e: Exception) {
         null
     }
@@ -686,7 +695,7 @@ fun ProfileField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    icon: ImageVector
 ) {
     Column {
         Text(

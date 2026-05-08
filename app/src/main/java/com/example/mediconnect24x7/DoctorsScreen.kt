@@ -291,35 +291,7 @@ fun FilterChipBar(selectedFilter: String, onFilterSelected: (String) -> Unit) {
     }
 }
 
-@Composable
-fun StatisticsRow() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        StatCard("4", "Available", Color(0xFFE8F5E9), PremiumTeal, Modifier.weight(1f))
-        StatCard("6", "Total Doctors", Color(0xFFE3F2FD), Color(0xFF1976D2), Modifier.weight(1f))
-        StatCard("~5 min", "Avg Wait", Color(0xFFFFF3E0), Color(0xFFF57C00), Modifier.weight(1f))
-    }
-}
 
-@Composable
-fun StatCard(value: String, label: String, bgColor: Color, textColor: Color, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = bgColor),
-        border = null
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(value, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = textColor)
-            Text(label, fontSize = 10.sp, color = textColor.copy(alpha = 0.7f), fontWeight = FontWeight.Medium)
-        }
-    }
-}
 
 @Composable
 fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Doctor, String, String) -> Unit = { _, _, _ -> }) {

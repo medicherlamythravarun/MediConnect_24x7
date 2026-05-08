@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {2
+fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     

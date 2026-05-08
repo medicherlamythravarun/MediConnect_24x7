@@ -28,16 +28,7 @@ data class Doctor(
     val initials: String
 )
 
-data class HealthRecord(
-    val name: String,
-    val age: Int,
-    val visits: Int,
-    val bloodGroup: String,
-    val allergies: String?,
-    val lastVisitDate: String,
-    val lastVisitReason: String,
-    val initials: String
-)
+
 
 data class UserProfile(
     val uid: String = "",
@@ -65,19 +56,6 @@ data class ReportRecord(
     val fileUrl: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
-
-data class MedicineRecord(
-    val id: String = "",
-    val userId: String = "",
-    val name: String = "",
-    val dosage: String = "",
-    val timeOfDay: String = "Morning",
-    val form: String = "Tablet",
-    val inventoryCount: Int = 30,
-    val isTakenToday: Boolean = false,
-    val lastTakenTimestamp: Long = 0L
-)
-
 data class DoctorProfile(
     val doctorId: String = "",
     val userId: String = "",
@@ -99,15 +77,6 @@ data class Appointment(
     val meetingId: String = "",
     val callEndTime: String = "",
     val timestamp: Long = System.currentTimeMillis()
-)
-
-data class Availability(
-    val availabilityId: String = "",
-    val doctorId: String = "",
-    val date: String = "",
-    val startTime: String = "",
-    val endTime: String = "",
-    val isAvailable: Boolean = true
 )
 
 data class AdminProfile(

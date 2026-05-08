@@ -64,6 +64,8 @@ import com.example.mediconnect24x7.auth.LoginScreen
 import com.example.mediconnect24x7.auth.RoleSelectionScreen
 import com.example.mediconnect24x7.core.Doctor
 import com.example.mediconnect24x7.core.Screen
+import com.example.mediconnect24x7.profile.ProfileScreen
+import com.example.mediconnect24x7.profile.SettingsScreen
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth

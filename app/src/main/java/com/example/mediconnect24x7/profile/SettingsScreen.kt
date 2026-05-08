@@ -1,4 +1,4 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
