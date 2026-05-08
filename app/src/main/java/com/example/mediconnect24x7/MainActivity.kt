@@ -58,6 +58,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mediconnect24x7.auth.CompleteProfileScreen
+import com.example.mediconnect24x7.auth.DoctorDetailsScreen
+import com.example.mediconnect24x7.auth.LoginScreen
+import com.example.mediconnect24x7.auth.RoleSelectionScreen
+import com.example.mediconnect24x7.core.Doctor
+import com.example.mediconnect24x7.core.Screen
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
@@ -75,7 +81,7 @@ class MainActivity : ComponentActivity() {
 fun MainAppContent() {
     val auth = FirebaseAuth.getInstance()
     var currentScreen by remember { 
-        mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login) 
+        mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login)
     }
     var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
     var selectedCallID by remember { mutableStateOf("") }
@@ -211,8 +217,8 @@ fun MainAppContent() {
         Box(modifier = Modifier.padding(paddingValues)) {
             when (currentScreen) {
                 Screen.Login -> LoginScreen(
-                    onLoginSuccess = { 
-                        currentScreen = Screen.Home 
+                    onLoginSuccess = {
+                        currentScreen = Screen.Home
                     }
                 )
                 Screen.RoleSelection -> RoleSelectionScreen(
@@ -225,7 +231,7 @@ fun MainAppContent() {
                     }
                 )
                 Screen.DoctorDetails -> DoctorDetailsScreen(
-                    onComplete = { 
+                    onComplete = {
                         if (userName.isBlank()) {
                             currentScreen = Screen.CompleteProfile
                         } else {
@@ -267,7 +273,7 @@ fun MainAppContent() {
                         selectedDoctor = doctor
                         selectedCallID = callID
                         selectedAppointmentId = appointmentId
-                        currentScreen = Screen.VideoCall 
+                        currentScreen = Screen.VideoCall
                     },
                     onJoinAppointment = { appointment ->
                         selectedCallID = appointment.meetingId
@@ -289,7 +295,7 @@ fun MainAppContent() {
                         selectedCallID = ""
                         selectedAppointmentId = ""
                         selectedClientName = ""
-                        currentScreen = Screen.Home 
+                        currentScreen = Screen.Home
                     }
                 )
                 Screen.Records -> RecordsScreen()
@@ -318,8 +324,8 @@ fun MainAppContent() {
 
 @Composable
 fun BottomNavigationBar(
-    currentScreen: Screen, 
-    userRole: String, 
+    currentScreen: Screen,
+    userRole: String,
     profilePicUrl: String,
     userName: String,
     onScreenSelected: (Screen) -> Unit
@@ -333,7 +339,7 @@ fun BottomNavigationBar(
             selected = currentScreen == Screen.Home,
             onClick = { 
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onScreenSelected(Screen.Home) 
+                onScreenSelected(Screen.Home)
             },
             icon = { Icon(if (currentScreen == Screen.Home) Icons.Default.Home else Icons.Outlined.Home, null) },
             label = { Text("Home", fontSize = 10.sp) },
@@ -351,7 +357,7 @@ fun BottomNavigationBar(
                 selected = currentScreen == Screen.AdminUsers,
                 onClick = { 
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onScreenSelected(Screen.AdminUsers) 
+                    onScreenSelected(Screen.AdminUsers)
                 },
                 icon = { Icon(if (currentScreen == Screen.AdminUsers) Icons.Default.People else Icons.Outlined.People, null) },
                 label = { Text("Users", fontSize = 10.sp) },
@@ -369,7 +375,7 @@ fun BottomNavigationBar(
                     selected = currentScreen == Screen.Doctors,
                     onClick = { 
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onScreenSelected(Screen.Doctors) 
+                        onScreenSelected(Screen.Doctors)
                     },
                     icon = { Icon(if (currentScreen == Screen.Doctors) Icons.Default.MedicalServices else Icons.Outlined.MedicalServices, null) },
                     label = { Text("Doctors", fontSize = 10.sp) },
@@ -386,7 +392,7 @@ fun BottomNavigationBar(
                     selected = currentScreen == Screen.Appointments,
                     onClick = { 
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onScreenSelected(Screen.Appointments) 
+                        onScreenSelected(Screen.Appointments)
                     },
                     icon = { Icon(if (currentScreen == Screen.Appointments) Icons.Default.EventNote else Icons.Outlined.EventNote, null) },
                     label = { Text("Upcoming", fontSize = 10.sp) },
@@ -403,7 +409,7 @@ fun BottomNavigationBar(
                 selected = currentScreen == Screen.Records,
                 onClick = { 
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onScreenSelected(Screen.Records) 
+                    onScreenSelected(Screen.Records)
                 },
                 icon = { Icon(if (currentScreen == Screen.Records) Icons.Default.Folder else Icons.Outlined.Folder, null) },
                 label = { Text("Records", fontSize = 10.sp) },
@@ -420,7 +426,7 @@ fun BottomNavigationBar(
                     selected = currentScreen == Screen.Medicines,
                     onClick = { 
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onScreenSelected(Screen.Medicines) 
+                        onScreenSelected(Screen.Medicines)
                     },
                     icon = { Icon(if (currentScreen == Screen.Medicines) Icons.Default.LocalPharmacy else Icons.Outlined.LocalPharmacy, null) },
                     label = { Text("Medicines", fontSize = 10.sp) },
@@ -437,7 +443,7 @@ fun BottomNavigationBar(
                     selected = currentScreen == Screen.Prescribe,
                     onClick = { 
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onScreenSelected(Screen.Prescribe) 
+                        onScreenSelected(Screen.Prescribe)
                     },
                     icon = { Icon(if (currentScreen == Screen.Prescribe) Icons.Default.NoteAdd else Icons.Outlined.NoteAdd, null) },
                     label = { Text("Prescribe", fontSize = 10.sp) },
@@ -454,7 +460,7 @@ fun BottomNavigationBar(
                 selected = currentScreen == Screen.Symptoms,
                 onClick = { 
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onScreenSelected(Screen.Symptoms) 
+                    onScreenSelected(Screen.Symptoms)
                 },
                 icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
                 label = { Text("Symptoms", fontSize = 10.sp) },

@@ -24,17 +24,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mediconnect24x7.core.CallActivity
+import com.example.mediconnect24x7.core.Doctor
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VideoCallScreen(
-    doctor: Doctor?, 
+    doctor: Doctor?,
     clientName: String = "",
-    userID: String, 
-    userName: String, 
-    callID: String, 
+    userID: String,
+    userName: String,
+    callID: String,
     appointmentId: String,
     onEndCall: () -> Unit
 ) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.mediconnect24x7.core.UserProfile
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.firestore.FirebaseFirestore

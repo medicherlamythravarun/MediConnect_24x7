@@ -1,4 +1,4 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.core
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector

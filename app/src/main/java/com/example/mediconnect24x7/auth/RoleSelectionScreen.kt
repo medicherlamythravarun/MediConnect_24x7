@@ -1,6 +1,7 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.auth
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,7 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mediconnect24x7.ui.theme.PremiumMint
+import com.example.mediconnect24x7.core.AdminProfile
+import com.example.mediconnect24x7.core.UserProfile
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -184,9 +186,9 @@ fun RoleCard(
             containerColor = Color.White
         ),
         border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(2.dp, PremiumTeal)
+            BorderStroke(2.dp, PremiumTeal)
         } else {
-            androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+            BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
         },
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
     ) {

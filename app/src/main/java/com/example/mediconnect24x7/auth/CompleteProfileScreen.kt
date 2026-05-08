@@ -1,4 +1,4 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.auth
 //73822 43069
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -19,6 +19,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mediconnect24x7.AgePickerDialog
+import com.example.mediconnect24x7.ProfileField
+import com.example.mediconnect24x7.core.UserProfile
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
@@ -43,7 +46,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
         AgePickerDialog(
             currentAge = age,
             onDismiss = { showAgePicker = false },
-            onAgeSelected = { 
+            onAgeSelected = {
                 age = it
                 showAgePicker = false
             }

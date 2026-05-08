@@ -3,7 +3,15 @@ package com.example.mediconnect24x7
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
@@ -11,7 +19,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -19,9 +39,38 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocalPharmacy
+import androidx.compose.material.icons.filled.NoteAdd
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +84,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.mediconnect24x7.ui.theme.*
+import com.example.mediconnect24x7.core.ServiceItem
+import com.example.mediconnect24x7.ui.theme.EmergencyRed
+import com.example.mediconnect24x7.ui.theme.GradientEnd
+import com.example.mediconnect24x7.ui.theme.GradientStart
+import com.example.mediconnect24x7.ui.theme.PremiumMint
+import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
@@ -423,24 +477,105 @@ fun ServiceGrid(
 ) {
     val services = if (userRole.lowercase() == "doctor") {
         listOf(
-            ServiceItem("Appointments", "check", Icons.Default.EventNote, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToDoctors),
-            ServiceItem("Records", "History", Icons.Default.Description, Color(0xFFF0FDF4), Color(0xFF16A34A), onNavigateToRecords),
-            ServiceItem("Prescriptions", "Create", Icons.Default.NoteAdd, Color(0xFFFFF7ED), Color(0xFFEA580C), onNavigateToMedicines),
-            ServiceItem("Symptoms", "Checker", Icons.Default.Analytics, Color(0xFFFDF4FF), Color(0xFFC026D3), onNavigateToSymptoms)
+            ServiceItem(
+                "Appointments",
+                "check",
+                Icons.Default.EventNote,
+                Color(0xFFEEF2FF),
+                Color(0xFF4F46E5),
+                onNavigateToDoctors
+            ),
+            ServiceItem(
+                "Records",
+                "History",
+                Icons.Default.Description,
+                Color(0xFFF0FDF4),
+                Color(0xFF16A34A),
+                onNavigateToRecords
+            ),
+            ServiceItem(
+                "Prescriptions",
+                "Create",
+                Icons.Default.NoteAdd,
+                Color(0xFFFFF7ED),
+                Color(0xFFEA580C),
+                onNavigateToMedicines
+            ),
+            ServiceItem(
+                "Symptoms",
+                "Checker",
+                Icons.Default.Analytics,
+                Color(0xFFFDF4FF),
+                Color(0xFFC026D3),
+                onNavigateToSymptoms
+            )
         )
     } else if (userRole.lowercase() == "admin") {
         listOf(
-            ServiceItem("Users", "Manage all users", Icons.Default.People, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToAdminUsers),
-            ServiceItem("Analytics", "System stats", Icons.Default.Analytics, Color(0xFFF0FDF4), Color(0xFF16A34A), {}),
-            ServiceItem("Reports", "View reports", Icons.Default.Description, Color(0xFFFFF7ED), Color(0xFFEA580C), {}),
-            ServiceItem("Settings", "App config", Icons.Default.Settings, Color(0xFFFDF4FF), Color(0xFFC026D3), {})
+            ServiceItem(
+                "Users",
+                "Manage all users",
+                Icons.Default.People,
+                Color(0xFFEEF2FF),
+                Color(0xFF4F46E5),
+                onNavigateToAdminUsers
+            ),
+            ServiceItem(
+                "Analytics",
+                "System stats",
+                Icons.Default.Analytics,
+                Color(0xFFF0FDF4),
+                Color(0xFF16A34A),
+                {}),
+            ServiceItem(
+                "Reports",
+                "View reports",
+                Icons.Default.Description,
+                Color(0xFFFFF7ED),
+                Color(0xFFEA580C),
+                {}),
+            ServiceItem(
+                "Settings",
+                "App config",
+                Icons.Default.Settings,
+                Color(0xFFFDF4FF),
+                Color(0xFFC026D3),
+                {})
         )
     } else {
         listOf(
-            ServiceItem("Consult", "Talk to doctor", Icons.Default.Videocam, Color(0xFFEEF2FF), Color(0xFF4F46E5), onNavigateToVideoCall),
-            ServiceItem("Records", "Your history", Icons.Default.Description, Color(0xFFF0FDF4), Color(0xFF16A34A), onNavigateToRecords),
-            ServiceItem("Pharmacy", "Buy medicine", Icons.Default.LocalPharmacy, Color(0xFFFFF7ED), Color(0xFFEA580C), onNavigateToMedicines),
-            ServiceItem("Symptoms", "AI Checker", Icons.Default.Analytics, Color(0xFFFDF4FF), Color(0xFFC026D3), onNavigateToSymptoms)
+            ServiceItem(
+                "Consult",
+                "Talk to doctor",
+                Icons.Default.Videocam,
+                Color(0xFFEEF2FF),
+                Color(0xFF4F46E5),
+                onNavigateToVideoCall
+            ),
+            ServiceItem(
+                "Records",
+                "Your history",
+                Icons.Default.Description,
+                Color(0xFFF0FDF4),
+                Color(0xFF16A34A),
+                onNavigateToRecords
+            ),
+            ServiceItem(
+                "Pharmacy",
+                "Buy medicine",
+                Icons.Default.LocalPharmacy,
+                Color(0xFFFFF7ED),
+                Color(0xFFEA580C),
+                onNavigateToMedicines
+            ),
+            ServiceItem(
+                "Symptoms",
+                "AI Checker",
+                Icons.Default.Analytics,
+                Color(0xFFFDF4FF),
+                Color(0xFFC026D3),
+                onNavigateToSymptoms
+            )
         )
     }
 

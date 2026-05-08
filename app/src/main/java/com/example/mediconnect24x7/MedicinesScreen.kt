@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import com.example.mediconnect24x7.core.Prescription
 import com.example.mediconnect24x7.ui.theme.PremiumTeal
 import com.example.mediconnect24x7.ui.theme.PremiumMint
 import com.google.firebase.auth.FirebaseAuth
@@ -46,7 +47,7 @@ fun MedicinesScreen() {
                 .addSnapshotListener { snapshot, _ ->
                     if (snapshot != null) {
                         val fetchedPrescriptions = snapshot.documents.mapNotNull { 
-                            it.toObject(Prescription::class.java) 
+                            it.toObject(Prescription::class.java)
                         }.sortedByDescending { it.timestamp }
                         
                         prescriptions = fetchedPrescriptions

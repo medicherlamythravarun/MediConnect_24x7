@@ -8,9 +8,6 @@ import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.mediconnect24x7.core.SymptomRecord
 import com.example.mediconnect24x7.ui.theme.*
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.firebase.auth.FirebaseAuth
@@ -237,7 +235,7 @@ fun SymptomsScreen() {
                                     val analysis = analyzeSymptomsWithGemini(currentText)
                                     if (currentUser != null && analysis != null) {
                                         val record = SymptomRecord(
-                                            id = java.util.UUID.randomUUID().toString(),
+                                            id = UUID.randomUUID().toString(),
                                             userId = currentUser.uid,
                                             symptoms = currentText,
                                             aiRecommendation = analysis,

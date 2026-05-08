@@ -1,4 +1,4 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.auth
 
 import android.app.Activity
 import androidx.compose.foundation.background
@@ -31,9 +31,11 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.TextStyle
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
@@ -110,7 +112,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
                         .offset(y = floatAnim.dp),
                     shape = CircleShape,
                     color = Color.White.copy(alpha = 0.2f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -349,7 +351,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .border(1.dp, Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                                textStyle = androidx.compose.ui.text.TextStyle(
+                                textStyle = TextStyle(
                                     textAlign = TextAlign.Center,
                                     letterSpacing = 12.sp,
                                     fontSize = 26.sp,
@@ -476,7 +478,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {2
 }
 
 @Composable
-fun borderStroke() = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+fun borderStroke() = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
 
 private fun sendOtp(
     auth: FirebaseAuth,

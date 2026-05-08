@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CallActivity"
+            android:name=".core.CallActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
             
         <provider

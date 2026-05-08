@@ -1,4 +1,4 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.core
 
 import android.app.Application
 import com.google.firebase.FirebaseApp

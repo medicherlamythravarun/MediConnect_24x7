@@ -1,9 +1,9 @@
-package com.example.mediconnect24x7
+package com.example.mediconnect24x7.core
 
 import android.os.Bundle
-import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mediconnect24x7.R
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayout
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutPictureInPictureConfig
