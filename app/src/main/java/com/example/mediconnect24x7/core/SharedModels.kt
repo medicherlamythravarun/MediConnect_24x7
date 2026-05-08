@@ -4,7 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Screen {
-    Home, Doctors, Records, Medicines, Symptoms, VideoCall, Login, Profile, RoleSelection, DoctorDetails, CompleteProfile, Appointments, Prescribe, About, AdminUsers, Settings
+    Home, Doctors, Records, Medicines, Symptoms, VideoCall,
+    Login, Profile, RoleSelection, DoctorDetails, CompleteProfile,
+    Appointments, Prescribe, About, AdminUsers, Settings, AppConfig, Splash
 }
 
 data class ServiceItem(
@@ -76,6 +78,7 @@ data class Appointment(
     val status: String = "Pending", // Pending, Confirmed, Cancelled, Completed
     val meetingId: String = "",
     val callEndTime: String = "",
+    val callEndDate: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
 

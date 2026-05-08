@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,17 +22,17 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalPharmacy
 import androidx.compose.material.icons.outlined.MedicalServices
-import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.NoteAdd
 import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -72,6 +73,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContent {
             MainAppContent()
@@ -82,9 +84,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainAppContent() {
     val auth = FirebaseAuth.getInstance()
-    var currentScreen by remember { 
-        mutableStateOf(if (auth.currentUser != null) Screen.Home else Screen.Login)
-    }
+    var currentScreen by remember { mutableStateOf(Screen.Splash) }
     var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
     var selectedCallID by remember { mutableStateOf("") }
     var selectedAppointmentId by remember { mutableStateOf("") }
@@ -178,9 +178,9 @@ fun MainAppContent() {
         val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
         // Role Check logic
-        LaunchedEffect(auth.currentUser, currentScreen) {
+        LaunchedEffect(auth.currentUser) {
             val user = auth.currentUser
-            if (user != null && (currentScreen == Screen.Home || currentScreen == Screen.Profile)) {
+            if (user != null) {
                 firestore.collection("users").document(user.uid).get()
                     .addOnSuccessListener { document ->
                         if (document.exists()) {
@@ -188,20 +188,27 @@ fun MainAppContent() {
                             userRole = role
                             userProfilePic = document.getString("profilePicUrl") ?: ""
                             userName = document.getString("name") ?: ""
-                            if (role.isEmpty()) {
-                                currentScreen = Screen.RoleSelection
-                            } else {
-                                val name = document.getString("name")
-                                if (name.isNullOrBlank()) {
-                                    currentScreen = Screen.CompleteProfile
-                                } else if (role == "doctor") {
-                                    // Check if doctor profile is complete
-                                    firestore.collection("doctors").document(user.uid).get()
-                                        .addOnSuccessListener { doc ->
-                                            if (!doc.exists()) {
-                                                currentScreen = Screen.DoctorDetails
+                            
+                            if (currentScreen == Screen.Splash) {
+                                if (role.isEmpty()) {
+                                    currentScreen = Screen.RoleSelection
+                                } else {
+                                    val name = document.getString("name")
+                                    if (name.isNullOrBlank()) {
+                                        currentScreen = Screen.CompleteProfile
+                                    } else if (role == "doctor") {
+                                        // Check if doctor profile is complete
+                                        firestore.collection("doctors").document(user.uid).get()
+                                            .addOnSuccessListener { doc ->
+                                                if (!doc.exists()) {
+                                                    currentScreen = Screen.DoctorDetails
+                                                } else {
+                                                    currentScreen = Screen.Home
+                                                }
                                             }
-                                        }
+                                    } else {
+                                        currentScreen = Screen.Home
+                                    }
                                 }
                             }
                             isRoleLoaded = true
@@ -209,15 +216,27 @@ fun MainAppContent() {
                             // User document doesn't exist yet, must select role
                             userRole = ""
                             isRoleLoaded = true
-                            currentScreen = Screen.RoleSelection
+                            if (currentScreen == Screen.Splash) {
+                                currentScreen = Screen.RoleSelection
+                            }
                         }
                     }
-            } else if (user == null) {
+                    .addOnFailureListener {
+                        isRoleLoaded = true
+                        if (currentScreen == Screen.Splash) {
+                            currentScreen = Screen.Login
+                        }
+                    }
+            } else {
                 isRoleLoaded = true
+                if (currentScreen == Screen.Splash) {
+                    currentScreen = Screen.Login
+                }
             }
         }
         Box(modifier = Modifier.padding(paddingValues)) {
             when (currentScreen) {
+                Screen.Splash -> SplashScreen()
                 Screen.Login -> LoginScreen(
                     onLoginSuccess = {
                         currentScreen = Screen.Home
@@ -256,7 +275,8 @@ fun MainAppContent() {
                     onNavigateToSymptoms = { currentScreen = Screen.Symptoms },
                     onNavigateToProfile = { currentScreen = Screen.Profile },
                     onNavigateToAbout = { currentScreen = Screen.About },
-                    onNavigateToAdminUsers = { currentScreen = Screen.AdminUsers }
+                    onNavigateToAdminUsers = { currentScreen = Screen.AdminUsers },
+                    onNavigateToAppConfig = { currentScreen = Screen.AppConfig }
                 )
                 Screen.Appointments -> AppointmentsScreen(
                     onJoinCall = { appointment ->
@@ -319,6 +339,7 @@ fun MainAppContent() {
                     onBack = { currentScreen = Screen.Home }
                 )
                 Screen.AdminUsers -> AdminUsersScreen()
+                Screen.AppConfig -> AppConfigScreen()
             }
         }
     }
@@ -363,6 +384,22 @@ fun BottomNavigationBar(
                 },
                 icon = { Icon(if (currentScreen == Screen.AdminUsers) Icons.Default.People else Icons.Outlined.People, null) },
                 label = { Text("Users", fontSize = 10.sp) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = PremiumTeal,
+                    selectedTextColor = PremiumTeal,
+                    unselectedIconColor = Color.LightGray,
+                    unselectedTextColor = Color.LightGray,
+                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
+                )
+            )
+            NavigationBarItem(
+                selected = currentScreen == Screen.AppConfig,
+                onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onScreenSelected(Screen.AppConfig)
+                },
+                icon = { Icon(if (currentScreen == Screen.AppConfig) Icons.Default.Settings else Icons.Outlined.Settings, null) },
+                label = { Text("Config", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = PremiumTeal,
                     selectedTextColor = PremiumTeal,
@@ -458,22 +495,7 @@ fun BottomNavigationBar(
                     )
                 )
             }
-            NavigationBarItem(
-                selected = currentScreen == Screen.Symptoms,
-                onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onScreenSelected(Screen.Symptoms)
-                },
-                icon = { Icon(if (currentScreen == Screen.Symptoms) Icons.Default.MonitorHeart else Icons.Outlined.MonitorHeart, null) },
-                label = { Text("Symptoms", fontSize = 10.sp) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PremiumTeal,
-                    selectedTextColor = PremiumTeal,
-                    unselectedIconColor = Color.LightGray,
-                    unselectedTextColor = Color.LightGray,
-                    indicatorColor = PremiumMint.copy(alpha = 0.15f)
-                )
-            )
+
         }
     }
 }

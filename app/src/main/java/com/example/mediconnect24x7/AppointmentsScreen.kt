@@ -159,7 +159,7 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(appointment.appointmentDate, fontSize = 14.sp, color = Color.DarkGray)
+                    Text(if (appointment.status == "Completed" && appointment.callEndDate.isNotEmpty()) appointment.callEndDate else appointment.appointmentDate, fontSize = 14.sp, color = Color.DarkGray)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)

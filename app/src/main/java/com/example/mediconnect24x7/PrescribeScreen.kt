@@ -202,7 +202,7 @@ fun CompletedAppointmentItem(appointment: Appointment, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(appointment.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("ID: ${appointment.clientId.takeLast(6)} · ${appointment.appointmentDate}", fontSize = 12.sp, color = Color.Gray)
+                Text("ID: ${appointment.clientId.takeLast(6)} · ${if (appointment.callEndDate.isNotEmpty()) appointment.callEndDate else appointment.appointmentDate}", fontSize = 12.sp, color = Color.Gray)
             }
             Spacer(modifier = Modifier.weight(1f))
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
@@ -240,7 +240,7 @@ fun PrescriptionForm(
             color = Color.DarkGray
         )
         Text(
-            "Consultation Date: ${appointment.appointmentDate}",
+            "Consultation Date: ${if (appointment.callEndDate.isNotEmpty()) appointment.callEndDate else appointment.appointmentDate}",
             fontSize = 13.sp,
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 32.dp)

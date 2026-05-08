@@ -106,7 +106,8 @@ fun MediConnectHomeScreen(
     onNavigateToSymptoms: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
-    onNavigateToAdminUsers: () -> Unit = {}
+    onNavigateToAdminUsers: () -> Unit = {},
+    onNavigateToAppConfig: () -> Unit = {}
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
@@ -267,7 +268,8 @@ fun MediConnectHomeScreen(
                     onNavigateToRecords = onNavigateToRecords,
                     onNavigateToMedicines = onNavigateToMedicines,
                     onNavigateToSymptoms = onNavigateToSymptoms,
-                    onNavigateToAdminUsers = onNavigateToAdminUsers
+                    onNavigateToAdminUsers = onNavigateToAdminUsers,
+                    onNavigateToAppConfig = onNavigateToAppConfig
                 )
                 EmergencyCard()
             }
@@ -473,7 +475,8 @@ fun ServiceGrid(
     onNavigateToRecords: () -> Unit,
     onNavigateToMedicines: () -> Unit,
     onNavigateToSymptoms: () -> Unit,
-    onNavigateToAdminUsers: () -> Unit = {}
+    onNavigateToAdminUsers: () -> Unit = {},
+    onNavigateToAppConfig: () -> Unit = {}
 ) {
     val services = if (userRole.lowercase() == "doctor") {
         listOf(
@@ -540,7 +543,7 @@ fun ServiceGrid(
                 Icons.Default.Settings,
                 Color(0xFFFDF4FF),
                 Color(0xFFC026D3),
-                {})
+                onNavigateToAppConfig)
         )
     } else {
         listOf(
