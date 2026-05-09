@@ -204,22 +204,7 @@ fun MainAppContent() {
                                 if (role.isEmpty()) {
                                     currentScreen = Screen.RoleSelection
                                 } else {
-                                    val name = document.getString("name")
-                                    if (name.isNullOrBlank()) {
-                                        currentScreen = Screen.CompleteProfile
-                                    } else if (role == "doctor") {
-                                        // Check if doctor profile is complete
-                                        firestore.collection("doctors").document(user.uid).get()
-                                            .addOnSuccessListener { doc ->
-                                                if (!doc.exists()) {
-                                                    currentScreen = Screen.DoctorDetails
-                                                } else {
-                                                    currentScreen = Screen.Home
-                                                }
-                                            }
-                                    } else {
-                                        currentScreen = Screen.Home
-                                    }
+                                    currentScreen = Screen.Home
                                 }
                             }
                             isRoleLoaded = true

@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="demo">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-08T06:28:26.356529800Z">
+        <DropdownSelection timestamp="2026-05-09T16:10:30.906405900Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCXB2B77YF" />
@@ -15,12 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCXB2B77YF" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\MADHUSHALNE\.android\avd\Resizable_Experimental.avd" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\MADHUSHALNE\.android\avd\Resizable_Experimental.avd" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCXB2B77YF" />
               </handle>
             </Target>
           </targets>

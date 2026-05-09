@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -55,7 +56,7 @@ fun SplashScreen() {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        PremiumTeal,
+                        Color(0xFFE2F2F1),
                         PremiumTeal.copy(alpha = 0.8f),
                         PremiumMint.copy(alpha = 0.6f)
                     )
@@ -76,15 +77,18 @@ fun SplashScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.iconmedi),
-                    contentDescription = "App icon"
+                    painter = painterResource(R.drawable.mcappicon),
+                    contentDescription = "App icon",
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape)
                 )
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "MediConnect 24/7",
+                text = "MediConnect 24x7",
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -101,7 +105,7 @@ fun SplashScreen() {
             )
         }
         
-        // Simple loading indicator at the bottom
+        //  loading indicator
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
