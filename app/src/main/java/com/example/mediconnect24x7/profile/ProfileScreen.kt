@@ -63,6 +63,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,7 +75,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -95,6 +98,7 @@ import java.io.ByteArrayOutputStream
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
@@ -107,6 +111,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
     var phoneNumber by remember { mutableStateOf("") }
     var profilePicUrl by remember { mutableStateOf("") }
     var userRole by remember { mutableStateOf("") }
+    var createdAt by remember { mutableLongStateOf(0L) }
     var isLoading by remember { mutableStateOf(true) }
 
     // Doctor specific fields
@@ -169,6 +174,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                         phoneNumber = document.getString("phone") ?: ""
                         profilePicUrl = document.getString("profilePicUrl") ?: ""
                         userRole = document.getString("role") ?: ""
+                        createdAt = document.getLong("createdAt") ?: 0L
 
                         if (userRole.lowercase() == "doctor") {
                             firestore.collection("doctors").document(currentUser.uid).get()
@@ -259,7 +265,10 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                     contentAlignment = Alignment.TopEnd
                 ) {
                     IconButton(
-                        onClick = onNavigateToSettings,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToSettings()
+                        },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -277,6 +286,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                             .background(Color.White.copy(alpha = 0.2f))
                             .border(BorderStroke(4.dp, Color.White), CircleShape)
                             .clickable { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 photoPickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
@@ -325,6 +335,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                             .size(40.dp)
                             .clip(CircleShape)
                             .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 photoPickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
@@ -404,7 +415,10 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                                     modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                                 )
                                 OutlinedCard(
-                                    onClick = { showAgePicker = true },
+                                    onClick = { 
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showAgePicker = true 
+                                    },
                                     modifier = Modifier.fillMaxWidth().height(56.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
@@ -444,7 +458,10 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                                                 .fillMaxHeight()
                                                 .clip(RoundedCornerShape(8.dp))
                                                 .background(if (gender == g) Color.White else Color.Transparent)
-                                                .clickable { gender = g },
+                                                .clickable { 
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    gender = g 
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
@@ -547,6 +564,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
             // Action Buttons
             Button(
                 onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (currentUser != null) {
                         try {
                             val profile = UserProfile(
@@ -557,7 +575,8 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                                 email = email,
                                 phone = phoneNumber,
                                 profilePicUrl = profilePicUrl,
-                                role = userRole
+                                role = userRole,
+                                createdAt = if (createdAt == 0L) System.currentTimeMillis() else createdAt
                             )
                             firestore.collection("users").document(currentUser.uid)
                                 .set(profile)
@@ -591,7 +610,10 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
             }
 
             OutlinedButton(
-                onClick = { showLogoutDialog = true },
+                onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showLogoutDialog = true 
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -615,6 +637,7 @@ fun AgePickerDialog(
     onDismiss: () -> Unit,
     onAgeSelected: (String) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select Age", fontWeight = FontWeight.Bold) },
@@ -626,7 +649,10 @@ fun AgePickerDialog(
                             text = i.toString(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onAgeSelected(i.toString()) }
+                                .clickable { 
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onAgeSelected(i.toString()) 
+                                }
                                 .padding(vertical = 14.dp),
                             fontSize = 18.sp,
                             textAlign = TextAlign.Center,

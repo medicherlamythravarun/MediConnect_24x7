@@ -79,7 +79,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,6 +111,7 @@ fun MediConnectHomeScreen(
     onNavigateToAdminUsers: () -> Unit = {},
     onNavigateToAppConfig: () -> Unit = {}
 ) {
+    val haptic = LocalHapticFeedback.current
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -189,7 +192,10 @@ fun MediConnectHomeScreen(
             },
             actions = {
                 IconButton(
-                    onClick = onNavigateToProfile,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateToProfile()
+                    },
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
                     if (profilePicUrl.isNotEmpty()) {
@@ -280,6 +286,7 @@ fun MediConnectHomeScreen(
 
 @Composable
 fun HeroCard(onClick: () -> Unit = {}) {
+    val haptic = LocalHapticFeedback.current
     val infiniteTransition = rememberInfiniteTransition(label = "hero_pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -299,7 +306,10 @@ fun HeroCard(onClick: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .clickable { onClick() },
+            .clickable { 
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick() 
+            },
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -596,6 +606,7 @@ fun ServiceGrid(
 
 @Composable
 fun ServiceCard(item: ServiceItem, modifier: Modifier = Modifier) {
+    val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "card_scale")
@@ -608,7 +619,10 @@ fun ServiceCard(item: ServiceItem, modifier: Modifier = Modifier) {
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = item.onClick
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    item.onClick()
+                }
             ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -680,6 +694,7 @@ fun ServiceCard(item: ServiceItem, modifier: Modifier = Modifier) {
 
 @Composable
 fun EmergencyCard() {
+    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
@@ -696,6 +711,7 @@ fun EmergencyCard() {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:104"))
                 context.startActivity(intent)
             },

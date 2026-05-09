@@ -162,6 +162,7 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
                     firestore.collection("users").document(currentUser.uid).get()
                         .addOnSuccessListener { doc ->
                             val role = doc.getString("role") ?: "client"
+                            val createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
                             val profile = UserProfile(
                                 uid = currentUser.uid,
                                 name = name,
@@ -170,7 +171,8 @@ fun CompleteProfileScreen(onComplete: () -> Unit) {
                                 email = email,
                                 phone = currentUser.phoneNumber ?: "",
                                 profilePicUrl = "",
-                                role = role
+                                role = role,
+                                createdAt = createdAt
                             )
                             
                             firestore.collection("users").document(currentUser.uid)

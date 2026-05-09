@@ -40,7 +40,8 @@ data class UserProfile(
     val email: String = "",
     val phone: String = "",
     val profilePicUrl: String = "",
-    val role: String = "" // "doctor", "client", "admin"
+    val role: String = "", // "doctor", "client", "admin"
+    val createdAt: Long = System.currentTimeMillis()
 )
 
 data class SymptomRecord(
@@ -72,6 +73,7 @@ data class Appointment(
     val clientId: String = "",
     val clientName: String = "",
     val doctorId: String = "",
+    val doctorName: String = "",
     val participants: List<String> = emptyList(),
     val appointmentDate: String = "",
     val appointmentTime: String = "",
@@ -93,6 +95,7 @@ data class Prescription(
     val doctorId: String = "",
     val clientId: String = "",
     val clientName: String = "",
+    val doctorName: String = "",
     val medicineName: String = "",
     val dosage: String = "",
     val instructions: String = "",

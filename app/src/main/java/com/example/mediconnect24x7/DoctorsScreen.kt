@@ -249,7 +249,7 @@ fun DoctorConsultationScreen(
                 }
             }
         } else {
-            AppointmentsScreen(showTopBar = false, onJoinCall = onJoinAppointment)
+            AppointmentsScreen(userRole = "client", showTopBar = false, onJoinCall = onJoinAppointment)
         }
     }
 }
@@ -406,6 +406,7 @@ fun DoctorCard(doctor: Doctor, clientName: String, onNavigateToVideoCall: (Docto
                                 "clientId" to currentUser.uid,
                                 "clientName" to clientName,
                                 "doctorId" to doctor.uid,
+                                "doctorName" to doctor.name,
                                 "participants" to listOf(currentUser.uid, doctor.uid),
                                 "appointmentDate" to "Today",
                                 "appointmentTime" to "Now",

@@ -28,7 +28,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentsScreen(showTopBar: Boolean = true, onJoinCall: (Appointment) -> Unit = {}) {
+fun AppointmentsScreen(
+    userRole: String = "client",
+    showTopBar: Boolean = true,
+    onJoinCall: (Appointment) -> Unit = {}
+) {
 
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
@@ -117,7 +121,7 @@ fun AppointmentsScreen(showTopBar: Boolean = true, onJoinCall: (Appointment) -> 
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(currentList) { appointment ->
-                    AppointmentCard(appointment, onJoinCall)
+                    AppointmentCard(appointment, userRole, onJoinCall)
                 }
             }
         }
@@ -125,7 +129,11 @@ fun AppointmentsScreen(showTopBar: Boolean = true, onJoinCall: (Appointment) -> 
 }
 
 @Composable
-fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit = {}) {
+fun AppointmentCard(
+    appointment: Appointment,
+    userRole: String,
+    onJoinCall: (Appointment) -> Unit = {}
+) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +154,12 @@ fun AppointmentCard(appointment: Appointment, onJoinCall: (Appointment) -> Unit 
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(appointment.clientName.ifEmpty { "Patient" }, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    val displayName = if (userRole.lowercase() == "doctor") {
+                        appointment.clientName.ifEmpty { "Patient" }
+                    } else {
+                        appointment.doctorName.ifEmpty { "Doctor" }
+                    }
+                    Text(displayName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Text(appointment.status, color = if (appointment.status == "Confirmed" || appointment.status == "Ongoing") PremiumTeal else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }

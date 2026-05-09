@@ -291,6 +291,7 @@ fun MainAppContent() {
                     onNavigateToAppConfig = { currentScreen = Screen.AppConfig }
                 )
                 Screen.Appointments -> AppointmentsScreen(
+                    userRole = userRole,
                     onJoinCall = { appointment ->
                         selectedCallID = appointment.meetingId
                         selectedAppointmentId = appointment.appointmentId
@@ -507,7 +508,6 @@ fun BottomNavigationBar(
                     )
                 )
             }
-
         }
     }
 }

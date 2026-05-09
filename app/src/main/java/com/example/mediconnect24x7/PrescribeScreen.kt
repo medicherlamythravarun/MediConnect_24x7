@@ -48,6 +48,16 @@ fun PrescribeScreen() {
     var dosage by remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
+    var doctorName by remember { mutableStateOf("") }
+
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser != null) {
+            firestore.collection("users").document(currentUser.uid).get()
+                .addOnSuccessListener { doc ->
+                    doctorName = doc.getString("name") ?: ""
+                }
+        }
+    }
 
     LaunchedEffect(currentUser?.uid) {
         if (currentUser != null) {
@@ -156,6 +166,7 @@ fun PrescribeScreen() {
                         "prescriptionId" to prescriptionId,
                         "appointmentId" to selectedAppointment!!.appointmentId,
                         "doctorId" to currentUser?.uid,
+                        "doctorName" to (if (doctorName.startsWith("Dr. ")) doctorName else "Dr. $doctorName"),
                         "clientId" to selectedAppointment!!.clientId,
                         "clientName" to selectedAppointment!!.clientName,
                         "medicineName" to medicineName,
