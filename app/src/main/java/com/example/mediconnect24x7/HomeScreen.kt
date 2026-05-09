@@ -327,7 +327,7 @@ fun HeroCard(onClick: () -> Unit = {}) {
         ) {
             Column {
                 Text(
-                    "online medical support  \uD83E\uDD1D",
+                    "Online medical support  \uD83E\uDD1D",
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -492,7 +492,7 @@ fun ServiceGrid(
         listOf(
             ServiceItem(
                 "Appointments",
-                "check",
+                "Check",
                 Icons.Default.EventNote,
                 Color(0xFFEEF2FF),
                 Color(0xFF4F46E5),
@@ -500,7 +500,7 @@ fun ServiceGrid(
             ),
             ServiceItem(
                 "Records",
-                "History",
+                "Upload",
                 Icons.Default.Description,
                 Color(0xFFF0FDF4),
                 Color(0xFF16A34A),
