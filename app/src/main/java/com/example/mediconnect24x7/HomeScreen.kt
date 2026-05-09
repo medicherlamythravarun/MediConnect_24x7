@@ -15,6 +15,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -82,6 +83,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -325,15 +327,14 @@ fun HeroCard(onClick: () -> Unit = {}) {
         ) {
             Column {
                 Text(
-                    "Hello there \uD83D\uDC4B",
-
+                    "online medical support  \uD83E\uDD1D",
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Your Health, \nOur Priority",
+                    "Your Health\nOur Priority",
                     color = Color.White,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -341,7 +342,7 @@ fun HeroCard(onClick: () -> Unit = {}) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Glassmorphic chip
+                // Glass box
                 Surface(
                     color = Color.White.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(12.dp),
@@ -367,14 +368,13 @@ fun HeroCard(onClick: () -> Unit = {}) {
                     }
                 }
             }
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.15f),
+            Image(
+                painter = painterResource(R.drawable.appnobg),
+                contentDescription = "transparent logo",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(120.dp)
                     .align(Alignment.BottomEnd)
-                    .offset(x = 10.dp, y = 10.dp)
+                    .offset(x = 30.dp, y = 25.dp)
             )
         }
     }

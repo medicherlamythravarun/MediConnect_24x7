@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mediconnect24x7.ui.theme.*
+import com.example.mediconnect24x7.R
 import androidx.activity.compose.BackHandler
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
@@ -32,9 +33,12 @@ import com.google.firebase.auth.PhoneAuthProvider
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
@@ -115,17 +119,18 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.MedicalServices,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(50.dp)
+                        Image(
+                            painter = painterResource(R.drawable.mcappicon),
+                            contentDescription = "App icon",
+                            modifier = Modifier
+                                .size(70.dp)
+                                .clip(CircleShape)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    "MediConnect 24/7",
+                    "MediConnect 24x7",
                     color = Color.White,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 28.sp,

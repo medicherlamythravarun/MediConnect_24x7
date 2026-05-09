@@ -131,12 +131,12 @@ fun RecordsScreen() {
                 title = {
                     Text(
                         "Health Records",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        color = PremiumTeal,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTeal)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
         floatingActionButton = {

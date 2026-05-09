@@ -88,7 +88,7 @@ fun PrescribeScreen() {
             .background(Color(0xFFF4F7F6))
     ) {
         TopAppBar(
-            title = { Text("Prescribe Medicine", fontWeight = FontWeight.Bold) },
+            title = { Text("Prescribe Medicine", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold) },
             navigationIcon = {
                 if (selectedAppointment != null) {
                     IconButton(onClick = { selectedAppointment = null }) {

@@ -248,7 +248,7 @@ fun ProfileScreen(onSignOut: () -> Unit, onNavigateToSettings: () -> Unit) {
                 .fillMaxWidth()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(PremiumTeal, PremiumTeal)
+                        colors = listOf(PremiumTeal,PremiumTeal,Color(0xFFD0E6E3))
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                 )
